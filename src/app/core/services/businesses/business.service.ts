@@ -1,3 +1,6 @@
+// Este servicio maneja todas las operaciones relacionadas con los negocios, tanto para 
+// la vista de cliente como para la administración. Incluye métodos para obtener negocios, 
+// actualizar su estado y mantener un negocio seleccionado para edición. 
 import { Injectable, signal } from '@angular/core';
 import { 
   Firestore, 

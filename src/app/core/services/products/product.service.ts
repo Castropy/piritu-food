@@ -1,3 +1,7 @@
+/* este servicio se encarga de manejar todas las operaciones relacionadas 
+con los productos, como obtener la lista de productos de un negocio,
+ agregar nuevos productos y actualizar los existentes.
+  Se utiliza Firestore para almacenar y recuperar los datos de los productos. */
 import { Injectable } from '@angular/core';
 import { 
   Firestore, 

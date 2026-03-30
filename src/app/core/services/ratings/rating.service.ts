@@ -1,3 +1,6 @@
+/* Servicio para manejar las calificaciones y feedback de clientes y negocios.
+Permite agregar nuevas calificaciones y obtener las calificaciones 
+de un negocio o cliente específico. */
 import { Injectable } from '@angular/core';
 import { Firestore, collection, addDoc, query, where, collectionData, Timestamp } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';

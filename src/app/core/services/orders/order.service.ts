@@ -1,3 +1,8 @@
+/* este servicio se encarga de manejar todas las operaciones relacionadas con los pedidos, 
+como crear un nuevo pedido, obtener pedidos por negocio o usuario, 
+y actualizar el estado del pedido. 
+Utiliza Firestore para almacenar y recuperar los datos de los pedidos en tiempo real. */
+
 import { Injectable } from '@angular/core';
 import { 
   Firestore, 

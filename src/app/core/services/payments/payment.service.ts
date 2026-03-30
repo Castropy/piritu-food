@@ -1,3 +1,7 @@
+/* Este servicio maneja las operaciones relacionadas con los pagos, 
+incluyendo la creación de nuevos pagos y la consulta de pagos asociados 
+a un negocio específico. Utiliza Firestore para almacenar y 
+recuperar los datos de los pagos. */
 import { Injectable } from '@angular/core';
 import { Firestore, collection, addDoc, collectionData, query, where, orderBy, Timestamp } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';

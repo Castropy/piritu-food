@@ -1,3 +1,9 @@
+// Este servicio maneja las operaciones CRUD para las categorías de los menús de los negocios.
+// Se encarga de obtener las categorías ordenadas para la UI, agregar nuevas categorías 
+// y actualizar las existentes.
+// Utiliza Firestore para almacenar y recuperar los datos de las categorías, y se 
+// asegura de que solo se obtengan las categorías habilitadas para un negocio específico, 
+// ordenadas por su orden de visualización.
 import { Injectable } from '@angular/core';
 import { 
   Firestore, 

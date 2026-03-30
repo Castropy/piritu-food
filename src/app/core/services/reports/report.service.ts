@@ -1,5 +1,13 @@
+/* ReportService: Servicio para manejar la creación y gestión de reportes 
+de problemas en la aplicación.
+- createReport: Método para crear un nuevo reporte en Firestore.
+- updateReportStatus: Método para actualizar el estado de un reporte
+ (abierto, en proceso, cerrado).
+- getAllReports: Método para obtener todos los reportes desde Firestore, 
+utilizado en el Admin Dashboard para monitorear y gestionar los reportes. */
 import { Injectable } from '@angular/core';
-import { Firestore, collection, addDoc, updateDoc, doc, collectionData, Timestamp } from '@angular/fire/firestore';
+import { Firestore, collection, addDoc, 
+  updateDoc, doc, collectionData, Timestamp } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { ReportStatus } from '../../../data/interfaces';
 

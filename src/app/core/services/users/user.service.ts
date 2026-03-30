@@ -1,3 +1,7 @@
+/* Servicio para manejar la lógica de usuario, incluyendo la sincronización 
+con Firestore y el estado reactivo del usuario actual.
+ademas de proporcionar métodos para crear, actualizar y obtener el perfil del usuario. */
+
 import { Injectable, signal } from '@angular/core';
 import { 
   Firestore, 

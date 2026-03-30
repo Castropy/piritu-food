@@ -1,3 +1,4 @@
+/* Servicio para manejar operaciones relacionadas con los administradores */
 import { Injectable, signal } from '@angular/core';
 import { Firestore, doc, getDoc, updateDoc, docData } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
