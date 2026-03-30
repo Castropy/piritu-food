@@ -12,7 +12,7 @@ interface Hook {
   standalone: true,
   imports: [CommonModule],
   templateUrl: './lobby.component.html',
-  styleUrl: './lobby.component.css'
+  //styleUrl: './lobby.component.css'
 })
 export class LobbyComponent implements OnInit, OnDestroy {
   private router = inject(Router);
