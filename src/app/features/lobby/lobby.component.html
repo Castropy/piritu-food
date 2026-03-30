@@ -5,7 +5,7 @@
     <div class="absolute inset-0 w-full h-full">
       @for (img of images(); track img; let i = $index) {
         <img [src]="'/images/lobby/' + img" 
-             class="absolute inset-0 w-full h-full object-cover transition-opacity duration-[1500ms] ease-in-out"
+             class="absolute inset-0 w-full h-full object-cover transition-opacity duration-1500ms ease-in-out"
              [class.opacity-100]="activeImageIndex() === i"
              [class.opacity-0]="activeImageIndex() !== i"
              [alt]="img">
