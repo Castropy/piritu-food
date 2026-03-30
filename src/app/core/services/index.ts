@@ -2,3 +2,8 @@ export * from './admin/admin.service';
 export * from './payments/payment.service'; 
 export * from './ratings/rating.service';
 export * from './reports/report.service';
+export * from './categories/category.service';
+export * from './products/product.service';
+export * from './orders/order.service';
+export * from './users/user.service';
+export * from './businesses/business.service';
