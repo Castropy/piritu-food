@@ -4,3 +4,7 @@ export * from './businesses/business.interface';
 export * from './products/product.interface';
 export * from './categories/category.interface';
 export * from './orders/order.interface';
+export * from './payments/payment.interface';
+export * from './admins/admin.interface';
+export * from './ratings/rating.interface';
+export * from './reports/report.interface';
