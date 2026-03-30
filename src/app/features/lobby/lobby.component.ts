@@ -17,67 +17,76 @@ interface Hook {
 export class LobbyComponent implements OnInit, OnDestroy {
   private router = inject(Router);
 
-  // Signal para el mensaje persuasivo dinámico
+  // --- Signals de Estado ---
   currentHook = signal<string>('¿Qué se te antoja hoy en Píritu?');
+  activeImageIndex = signal<number>(0);
   
-  // Timer para rotar los ganchos automáticamente
+  // Lista de imágenes reales en public/images/lobby/
+  images = signal<string[]>([
+    'bat_fresa.webp', 'cachapa.webp', 'empanadas.webp', 'grill.webp', 
+    'hamburguesa.webp', 'hand_burguer.webp', 'hot_dogs.webp', 'pabellon.webp', 
+    'papitas.webp', 'parrilla.webp', 'pasticho.webp', 'pizza.webp', 'pollo_asado.webp'
+  ]);
+
+  // Timers para limpieza
   private hookInterval: any;
+  private imageInterval: any;
 
   // TODO: Inyectar FirestoreService para traer productos y negocios reales
   featuredProducts = signal<any[]>([]); 
   activeBusinesses = signal<any[]>([]);
 
-  // Repositorio de ganchos persuasivos (Copywriting)
   private hooks: Hook[] = [
     { text: '¿Hoy es domingo? Pide tu desayuno y sigue descansando.', type: 'client' },
     { text: '¿Llegaste cansado del trabajo? Una hamburguesa te espera.', type: 'client' },
     { text: '¿Antojo de pizza? Los mejores locales de Píritu están aquí.', type: 'client' },
-    { text: 'Impulsa las ventas de tu negocio. ¡Regístrate ahora!', type: 'business' },
+    { text: '¡Demuestra tu potencial en la cocina! Registra tu negocio.', type: 'business' },
     { text: 'Muestra más, vende más, gana más con PírituFood.', type: 'business' },
     { text: '¿Quieres apartar una mesa? Hazlo rápido desde la web.', type: 'client' }
   ];
 
   ngOnInit() {
-    this.initDynamicHooks();
+    this.initDynamicContent();
     this.loadPreviewData();
   }
 
   ngOnDestroy() {
-    // Limpiamos el timer para evitar fugas de memoria
+    // Limpieza total de intervalos
     if (this.hookInterval) clearInterval(this.hookInterval);
+    if (this.imageInterval) clearInterval(this.imageInterval);
   }
 
   /**
-   * Inicializa la rotación de ganchos según el contexto
+   * Inicializa la rotación de ganchos y el carrusel de imágenes
    */
-  private initDynamicHooks() {
+  private initDynamicContent() {
     const hour = new Date().getHours();
-    const day = new Date().getDay(); // 0 es Domingo
+    const day = new Date().getDay(); 
 
-    // Prioridad por contexto (Mañana o Domingo)
+    // Lógica inicial de ganchos por contexto
     if (day === 0 && hour < 12) {
       this.currentHook.set('¡Feliz domingo! Pide tus empanadas y quédate en cama.');
     } else if (hour >= 18) {
       this.currentHook.set('¿Cena lista? Revisa las promociones de hoy.');
-    } else {
-      this.rotateHooks();
     }
 
-    // Rotación automática cada 8 segundos para mantener el Lobby "vivo"
-    this.hookInterval = setInterval(() => this.rotateHooks(), 8000);
-  }
+    // Rotación de Ganchos (Cada 8 segundos)
+    this.hookInterval = setInterval(() => {
+      const randomIndex = Math.floor(Math.random() * this.hooks.length);
+      this.currentHook.set(this.hooks[randomIndex].text);
+    }, 8000);
 
-  private rotateHooks() {
-    const randomIndex = Math.floor(Math.random() * this.hooks.length);
-    this.currentHook.set(this.hooks[randomIndex].text);
+    // Rotación de Imágenes Crossfade (Cada 5 segundos)
+    this.imageInterval = setInterval(() => {
+      this.activeImageIndex.update(index => (index + 1) % this.images().length);
+    }, 5000);
   }
 
   /**
    * Carga inicial de datos de muestra
    */
   async loadPreviewData() {
-    // TODO: Implementar query: collection('products').limit(8)
-    // TODO: Implementar query: collection('businesses').where('is_verified', '==', true).limit(4)
+    // TODO: Implementar queries de Firestore
   }
 
   /**
@@ -88,11 +97,11 @@ export class LobbyComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Redirección a la búsqueda o categorías
+   * Redirección a la búsqueda
    */
   search(term: string) {
     if (!term) return;
-    // TODO: Navegar a /search?q=term
     console.log('Buscando:', term);
+    // TODO: Implementar navegación a resultados
   }
 }
