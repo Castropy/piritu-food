@@ -1,10 +1,13 @@
-import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
+import { 
+  ApplicationConfig, 
+  // 1. Cambiamos provideZoneChangeDetection por este:
+  provideZonelessChangeDetection 
+} from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 
 // Firebase core
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
-// Módulos de Firebase que usaremos en PírituFood
 import { getAuth, provideAuth } from '@angular/fire/auth';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { getStorage, provideStorage } from '@angular/fire/storage';
@@ -14,7 +17,9 @@ import { environment } from '../environments/environment';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideZoneChangeDetection({ eventCoalescing: true }),
+    // 2. Sustituimos provideZoneChangeDetection
+    provideZonelessChangeDetection(), 
+    
     provideRouter(routes),
     provideClientHydration(withEventReplay()),
 

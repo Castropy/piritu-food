@@ -1,1 +1,69 @@
-<p>auth works!</p>
+<div class="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+  
+  <div class="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 space-y-6">
+    
+    <div class="text-center">
+      <h1 class="text-3xl font-bold text-orange-600">PírituFood</h1>
+      <p class="text-gray-500">{{ authMode() === 'login' ? '¡Qué bueno verte, socio!' : 'Únete a la comunidad' }}</p>
+    </div>
+
+    <div *ngIf="authMode() === 'register'" class="flex bg-gray-100 p-1 rounded-xl">
+      <button (click)="setUserType('client')" 
+              [className]="userType() === 'client' ? 'w-1/2 py-2 rounded-lg bg-white shadow-sm font-semibold' : 'w-1/2 py-2 text-gray-500'">
+        Cliente
+      </button>
+      <button (click)="setUserType('business')" 
+              [className]="userType() === 'business' ? 'w-1/2 py-2 rounded-lg bg-white shadow-sm font-semibold' : 'w-1/2 py-2 text-gray-500'">
+        Negocio
+      </button>
+    </div>
+
+    <form [formGroup]="authForm" (ngSubmit)="onSubmit()" class="space-y-4">
+      
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Correo Electrónico</label>
+        <input type="email" formControlName="email" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm p-2 border">
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Contraseña</label>
+        <input type="password" formControlName="password" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm p-2 border">
+      </div>
+
+      <ng-container *ngIf="authMode() === 'register'">
+        
+        <div *ngIf="userType() === 'client'" class="space-y-4 animate-fade-in">
+          <input type="text" formControlName="firstName" placeholder="Nombre" class="w-full p-2 border rounded-md">
+          <input type="text" formControlName="lastName" placeholder="Apellido" class="w-full p-2 border rounded-md">
+          <input type="text" formControlName="dni" placeholder="DNI / Cédula" class="w-full p-2 border rounded-md">
+        </div>
+
+        <div *ngIf="userType() === 'business'" class="space-y-4 animate-fade-in">
+          <input type="text" formControlName="businessName" placeholder="Nombre del Negocio" class="w-full p-2 border rounded-md">
+          <input type="text" formControlName="taxId" placeholder="RIF / Tax ID" class="w-full p-2 border rounded-md">
+          <input type="text" formControlName="phone" placeholder="Teléfono de contacto" class="w-full p-2 border rounded-md">
+        </div>
+
+      </ng-container>
+
+      <div *ngIf="errorMessage()" class="bg-red-50 text-red-600 p-3 rounded-lg text-sm border border-red-200">
+        {{ errorMessage() }}
+      </div>
+
+      <button type="submit" 
+              [disabled]="isLoading()"
+              class="w-full py-3 px-4 border border-transparent rounded-xl shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 font-bold transition-all disabled:opacity-50">
+        <span *ngIf="!isLoading()">{{ authMode() === 'login' ? 'Entrar' : 'Registrarme' }}</span>
+        <span *ngIf="isLoading()">Procesando...</span>
+      </button>
+
+    </form>
+
+    <div class="text-center">
+      <button (click)="toggleMode()" class="text-orange-600 hover:underline text-sm font-medium">
+        {{ authMode() === 'login' ? '¿No tienes cuenta? Crea una aquí' : '¿Ya eres socio? Inicia sesión' }}
+      </button>
+    </div>
+
+  </div>
+</div>

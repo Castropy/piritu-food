@@ -14,7 +14,7 @@ type UserType = 'client' | 'business';
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './auth.component.html',
-  styleUrl: './auth.component.css'
+  //styleUrl: './auth.component.css'
 })
 export class AuthComponent {
   private fb = inject(FormBuilder);
