@@ -7,10 +7,15 @@ import {
   docData, 
   addDoc, 
   updateDoc, 
+  deleteDoc,
   query, 
   where, 
   limit, 
-  orderBy 
+  orderBy,
+  CollectionReference,
+  DocumentReference,
+  DocumentData,
+  WithFieldValue
 } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 
@@ -21,53 +26,88 @@ export class FirestoreService {
   private firestore = inject(Firestore);
 
   /**
-   * Obtiene una colección completa con IDs incluidos
-   * @param path Nombre de la colección (ej: 'products')
+   * --- LECTURAS EN TIEMPO REAL (REACCIONAN A CAMBIOS) ---
    */
-  getCollection<T>(path: string): Observable<T[]> {
-    const ref = collection(this.firestore, path);
+
+  /**
+   * Obtiene una colección completa mapeada a un tipo genérico.
+   * @template T Debe ser un objeto que acepte una propiedad 'id' opcional.
+   */
+  getCollection<T extends { id?: string }>(path: string): Observable<T[]> {
+    const ref = collection(this.firestore, path) as CollectionReference<T>;
+    // Usamos 'as any' para el idField para evitar conflictos estrictos de tipos de AngularFire
     return collectionData(ref, { idField: 'id' }) as Observable<T[]>;
   }
 
   /**
-   * Obtiene documentos filtrados (Ej: Solo productos de una categoría)
+   * Obtiene items destacados (Lobby/Store) con límite y orden.
    */
-  getFilteredCollection<T>(path: string, field: string, value: any): Observable<T[]> {
-    const ref = collection(this.firestore, path);
+  getFeatured<T extends { id?: string }>(path: string, max: number = 6): Observable<T[]> {
+    const ref = collection(this.firestore, path) as CollectionReference<T>;
+    const q = query(ref, limit(max), orderBy('createdAt', 'desc')); 
+    return collectionData(q, { idField: 'id' }) as Observable<T[]>;
+  }
+
+  /**
+   * Obtiene items filtrados por un campo específico.
+   * Ej: getFiltered<Product>('products', 'category', 'pizzas')
+   */
+  getFiltered<T extends { id?: string }>(path: string, field: string, value: any): Observable<T[]> {
+    const ref = collection(this.firestore, path) as CollectionReference<T>;
     const q = query(ref, where(field, '==', value));
     return collectionData(q, { idField: 'id' }) as Observable<T[]>;
   }
 
   /**
-   * Los "Destacados" del Lobby: Limita la carga para ahorrar cuota
+   * Obtiene un solo documento por su ID.
    */
-  getFeaturedItems<T>(path: string, max: number = 6): Observable<T[]> {
-    const ref = collection(this.firestore, path);
-    const q = query(ref, limit(max)); // Podrías añadir orderBy('sales', 'desc')
-    return collectionData(q, { idField: 'id' }) as Observable<T[]>;
-  }
-
-  /**
-   * Obtener un solo documento (Ej: Detalle de un negocio)
-   */
-  getDocById<T>(path: string, id: string): Observable<T> {
-    const ref = doc(this.firestore, `${path}/${id}`);
+  getDoc<T extends { id?: string }>(path: string, id: string): Observable<T> {
+    const ref = doc(this.firestore, `${path}/${id}`) as DocumentReference<T>;
     return docData(ref, { idField: 'id' }) as Observable<T>;
   }
 
   /**
-   * Crear un nuevo registro (Ej: El negocio subiendo un plato)
+   * --- OPERACIONES DE ESCRITURA (PROMESAS) ---
    */
-  async createDoc(path: string, data: any) {
-    const ref = collection(this.firestore, path);
-    return await addDoc(ref, data);
+
+  /**
+   * Crea un documento nuevo.
+   * Precaución: No olvides añadir 'createdAt' manualmente si quieres usar getFeatured.
+   */
+  async createDoc<T extends DocumentData>(path: string, data: WithFieldValue<T>): Promise<string> {
+    try {
+      const ref = collection(this.firestore, path);
+      const docRef = await addDoc(ref, data);
+      return docRef.id;
+    } catch (error) {
+      console.error(`[FirestoreService] Error en createDoc (${path}):`, error);
+      throw error;
+    }
   }
 
   /**
-   * Actualizar datos (Ej: Cambiar precio de un producto)
+   * Actualiza campos específicos de un documento.
    */
-  async updateDoc(path: string, id: string, data: any) {
-    const ref = doc(this.firestore, `${path}/${id}`);
-    return await updateDoc(ref, data);
+  async updateDoc(path: string, id: string, data: Partial<DocumentData>): Promise<void> {
+    try {
+      const ref = doc(this.firestore, `${path}/${id}`);
+      await updateDoc(ref, data);
+    } catch (error) {
+      console.error(`[FirestoreService] Error en updateDoc (${id}):`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Elimina un documento de la base de datos.
+   */
+  async deleteDoc(path: string, id: string): Promise<void> {
+    try {
+      const ref = doc(this.firestore, `${path}/${id}`);
+      await deleteDoc(ref);
+    } catch (error) {
+      console.error(`[FirestoreService] Error en deleteDoc (${id}):`, error);
+      throw error;
+    }
   }
 }
