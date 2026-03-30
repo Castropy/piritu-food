@@ -1,17 +1,21 @@
+import { Timestamp } from 'firebase/firestore';
+
 export interface Business {
   id: string;               // El ID del documento en Firestore
   address: string;
   closing_time: string;     // Formato "23:30"
   description: string;
-  email: string;            // Correo de contacto del local
-  gallery_urls: string[];   // El array de fotos que definimos
-  image_url: string;        // Foto de perfil/logo principal
-  is_blocked: boolean;      // Control administrativo
-  is_verified: boolean;     // Check azul de local confiable
-  name: string;             // Nombre comercial (ej: Pizzas Píritu)
-  opening_time: string;     // Formato "18:00"
-  owner_name: string;       // Persona responsable
-  penalty_status: number;   // Tracking de faltas del negocio
+  email: string;           
+  gallery_urls: string[];   // Array de fotos
+  image_url: string;        // Foto principal/logo
+  is_blocked: boolean;      
+  is_verified: boolean;     
+  name: string;             
+  opening_time: string;     
+  owner_name: string;       
+  penalty_status: number;   
   phone: string;
-  tax_id: string;           // RIF o identificación fiscal
+  tax_id: string;           
+  created_at?: Timestamp | Date;
+  updated_at?: Timestamp | Date;
 }
