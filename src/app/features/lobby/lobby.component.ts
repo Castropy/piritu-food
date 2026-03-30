@@ -1,6 +1,8 @@
 import { Component, OnInit, signal, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { FirestoreService } from '../../core/services/firestore/firestore.service'; // Ajusta la ruta si es necesario
+import { Product } from '../../data/interfaces'; // Importamos tu interfaz blindada
 
 interface Hook {
   text: string;
@@ -12,28 +14,25 @@ interface Hook {
   standalone: true,
   imports: [CommonModule],
   templateUrl: './lobby.component.html',
-  //styleUrl: './lobby.component.css'
 })
 export class LobbyComponent implements OnInit, OnDestroy {
   private router = inject(Router);
+  private firestoreService = inject(FirestoreService); // <--- Inyectamos el motor
 
-  // --- Signals de Estado ---
   currentHook = signal<string>('¿Qué se te antoja hoy en Píritu?');
   activeImageIndex = signal<number>(0);
   
-  // Lista de imágenes reales en public/images/lobby/
   images = signal<string[]>([
     'bat_fresa.webp', 'cachapa.webp', 'empanadas.webp', 'grill.webp', 
     'hamburguesa.webp', 'hand_burguer.webp', 'hot_dogs.webp', 'pabellon.webp', 
     'papitas.webp', 'parrilla.webp', 'pasticho.webp', 'pizza.webp', 'pollo_asado.webp'
   ]);
 
-  // Timers para limpieza
   private hookInterval: any;
   private imageInterval: any;
 
-  // TODO: Inyectar FirestoreService para traer productos y negocios reales
-  featuredProducts = signal<any[]>([]); 
+  // Tipamos el Signal con tu interfaz Product para tener autocompletado y seguridad
+  featuredProducts = signal<Product[]>([]); 
   activeBusinesses = signal<any[]>([]);
 
   private hooks: Hook[] = [
@@ -51,57 +50,52 @@ export class LobbyComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    // Limpieza total de intervalos
     if (this.hookInterval) clearInterval(this.hookInterval);
     if (this.imageInterval) clearInterval(this.imageInterval);
   }
 
-  /**
-   * Inicializa la rotación de ganchos y el carrusel de imágenes
-   */
   private initDynamicContent() {
     const hour = new Date().getHours();
     const day = new Date().getDay(); 
 
-    // Lógica inicial de ganchos por contexto
     if (day === 0 && hour < 12) {
       this.currentHook.set('¡Feliz domingo! Pide tus empanadas y quédate en cama.');
     } else if (hour >= 18) {
       this.currentHook.set('¿Cena lista? Revisa las promociones de hoy.');
     }
 
-    // Rotación de Ganchos (Cada 8 segundos)
     this.hookInterval = setInterval(() => {
       const randomIndex = Math.floor(Math.random() * this.hooks.length);
       this.currentHook.set(this.hooks[randomIndex].text);
     }, 8000);
 
-    // Rotación de Imágenes Crossfade (Cada 5 segundos)
     this.imageInterval = setInterval(() => {
       this.activeImageIndex.update(index => (index + 1) % this.images().length);
     }, 5000);
   }
 
   /**
-   * Carga inicial de datos de muestra
+   * Carga de datos reales desde Firestore
    */
-  async loadPreviewData() {
-    // TODO: Implementar queries de Firestore
+  loadPreviewData() {
+    // Escuchamos solo los productos habilitados (is_enabled: true)
+    this.firestoreService.getFiltered<Product>('products', 'is_enabled', true)
+      .subscribe({
+        next: (data) => {
+          // Tomamos los primeros 4 para mantener la estética del Lobby
+          this.featuredProducts.set(data.slice(0, 4));
+          console.log('Data real cargada en Lobby:', data);
+        },
+        error: (err) => console.error('Error cargando productos:', err)
+      });
   }
 
-  /**
-   * Navegación hacia Auth con el rol pre-seleccionado
-   */
   navigateToAuth(role: 'client' | 'business') {
     this.router.navigate(['/auth'], { queryParams: { role } });
   }
 
-  /**
-   * Redirección a la búsqueda
-   */
   search(term: string) {
     if (!term) return;
     console.log('Buscando:', term);
-    // TODO: Implementar navegación a resultados
   }
 }
