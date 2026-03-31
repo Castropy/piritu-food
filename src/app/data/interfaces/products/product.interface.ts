@@ -1,14 +1,15 @@
-import { Timestamp } from 'firebase/firestore';
+// ✅ CAMBIO VITAL: Importar desde @angular/fire/firestore
+import { Timestamp } from '@angular/fire/firestore'; 
 
 export interface Product {
-  id: string;               // El ID del documento (LI8K...)
-  business_id: string;      // ID que lo vincula al local
-  category_id: string;      // ID de la categoría
-  extras: string[];         // Array de extras opcionales
+  id: string;               
+  business_id: string;      
+  category_id: string;      
+  extras: string[];         
   image_url: string | null; 
-  ingredients: string[];    // Array con la lista de ingredientes
-  is_enabled: boolean;      // Para activar/desactivar plato (stock)
-  name: string;             // Nombre del plato (ej: Pizza Margarita)
+  ingredients: string[];    
+  is_enabled: boolean;      
+  name: string;             
   price: number;
   created_at?: Timestamp | Date;
   updated_at?: Timestamp | Date;
