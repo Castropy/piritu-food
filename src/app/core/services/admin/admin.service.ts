@@ -1,39 +1,55 @@
-/* Servicio para manejar operaciones relacionadas con los administradores */
 import { Injectable, signal } from '@angular/core';
-import { Firestore, doc, getDoc, updateDoc, docData } from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
+import { BaseFirestoreService } from '../firestore/base-firestore.service';
 import { Admin } from '../../../data/interfaces';
+import { AdminMapper } from '../../../data/mappers/admin/admin.mapper';
+import { Observable } from 'rxjs';
 
+/**
+ * AdminService: Gestiona las operaciones de los administradores de la plataforma.
+ * Hereda de BaseFirestoreService para aprovechar el CRUD genérico y el Mapper.
+ */
 @Injectable({
   providedIn: 'root'
 })
-export class AdminService {
-  // Signal para tener el admin actual disponible en toda la app
+export class AdminService extends BaseFirestoreService<Admin> {
+  
+  // Signal para mantener el estado del administrador actual de forma reactiva
   private currentAdminSignal = signal<Admin | null>(null);
-  readonly currentAdmin = this.currentAdminSignal.asReadonly();
+  public readonly currentAdmin = this.currentAdminSignal.asReadonly();
 
-  constructor(private firestore: Firestore) {}
-
-  /**
-   * Obtiene los datos de un admin por su UID
-   */
-  getAdminById(uid: string): Observable<Admin> {
-    const adminRef = doc(this.firestore, `admins/${uid}`);
-    return docData(adminRef, { idField: 'id' }) as Observable<Admin>;
+  constructor() {
+    // Inicializamos el servicio base con el path 'admins' y su mapper
+    super('admins', AdminMapper);
   }
 
   /**
-   * Actualiza el perfil del admin (ej: last_login o avatar)
+   * Obtiene los datos de un administrador por su UID.
+   * Sobrescribimos el nombre para mantener la semántica de tu servicio original.
    */
-  async updateAdmin(uid: string, data: Partial<Admin>): Promise<void> {
-    const adminRef = doc(this.firestore, `admins/${uid}`);
-    await updateDoc(adminRef, { ...data, updated_at: new Date() });
+  public getAdminById(uid: string): Observable<Admin> {
+    return this.getById(uid);
   }
 
   /**
-   * Guarda el admin en el signal para acceso global
+   * Actualiza el perfil del administrador (ej: last_login, avatar).
+   * El BaseFirestoreService ya maneja la actualización parcial.
    */
-  setAdmin(admin: Admin) {
+  public async updateAdmin(uid: string, data: Partial<Admin>): Promise<void> {
+    // Añadimos la fecha de actualización antes de enviar al servicio base
+    return this.update(uid, { ...data, updated_at: new Date() });
+  }
+
+  /**
+   * Establece el administrador activo en el Signal global.
+   */
+  public setAdmin(admin: Admin): void {
     this.currentAdminSignal.set(admin);
+  }
+
+  /**
+   * Limpia el estado del administrador (útil para el logout).
+   */
+  public clearAdmin(): void {
+    this.currentAdminSignal.set(null);
   }
 }
