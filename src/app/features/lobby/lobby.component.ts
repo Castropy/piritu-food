@@ -1,7 +1,7 @@
 import { Component, OnInit, signal, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { FirestoreService } from '../../core/services/firestore/firestore.service'; // Ajusta la ruta si es necesario
+import { BaseFirestoreService } from '../../core/services/firestore/base-firestore.service'; // Ajusta la ruta si es necesario
 import { Product } from '../../data/interfaces'; // Importamos tu interfaz blindada
 
 interface Hook {
@@ -17,7 +17,7 @@ interface Hook {
 })
 export class LobbyComponent implements OnInit, OnDestroy {
   private router = inject(Router);
-  private firestoreService = inject(FirestoreService); // <--- Inyectamos el motor
+  private firestoreService = inject(BaseFirestoreService); // <--- Inyectamos el motor
 
   currentHook = signal<string>('¿Qué se te antoja hoy en Píritu?');
   activeImageIndex = signal<number>(0);
