@@ -1,75 +1,77 @@
-/* este servicio se encarga de manejar todas las operaciones relacionadas con los pedidos, 
-como crear un nuevo pedido, obtener pedidos por negocio o usuario, 
-y actualizar el estado del pedido. 
-Utiliza Firestore para almacenar y recuperar los datos de los pedidos en tiempo real. */
-
 import { Injectable } from '@angular/core';
-import { 
-  Firestore, 
-  collection, 
-  addDoc, 
-  query, 
-  where, 
-  orderBy, 
-  collectionData,
-  doc,
-  updateDoc,
-  Timestamp 
-} from '@angular/fire/firestore';
+import { BaseFirestoreService } from '../firestore/base-firestore.service';
+import { Order, OrderStatus } from '../../../data/interfaces';
+import { OrderMapper } from '../../../data/mappers/ordersorder.mapper';
 import { Observable } from 'rxjs';
-import { Order, OrderStatus } from '../../../data/interfaces'; // Barrel import
+import { where, orderBy } from '@angular/fire/firestore';
 
+/**
+ * OrderService: Gestiona el ciclo de vida completo de los pedidos.
+ * * Este servicio centraliza la creación de órdenes, el seguimiento en tiempo real 
+ * para negocios y el historial para clientes. Hereda la funcionalidad base de 
+ * Firestore y utiliza un mapeador especializado para asegurar que la estructura 
+ * de la orden y sus marcas de tiempo sean consistentes.
+ */
 @Injectable({
   providedIn: 'root'
 })
-export class OrderService {
-  private readonly collectionName = 'orders';
+export class OrderService extends BaseFirestoreService<Order> {
 
-  constructor(private firestore: Firestore) {}
+  constructor() {
+    // Inicializa el servicio con la colección 'orders' y su respectivo mapper
+    super('orders', OrderMapper);
+  }
 
   /**
-   * Crea un nuevo pedido desde la App del Cliente
+   * Registra un nuevo pedido en el sistema iniciado por un cliente.
+   * * Establece el estado inicial como 'pending' y utiliza el servicio base 
+   * para persistir la información, aplicando automáticamente las marcas de 
+   * tiempo y la limpieza de datos a través del mapper.
    */
-  async createOrder(order: Omit<Order, 'id'>): Promise<void> {
-    const ordersRef = collection(this.firestore, this.collectionName);
-    await addDoc(ordersRef, {
+  public async createOrder(order: Order): Promise<string> {
+    return this.create({
       ...order,
-      created_at: Timestamp.now(),
-      status: 'pending' as OrderStatus
+      status: 'pending',
+      created_at: new Date(),
+      updated_at: new Date()
     });
   }
 
   /**
-   * Escucha los pedidos en tiempo real para un negocio (Panel de Admin/Negocio)
+   * Proporciona un flujo de datos en tiempo real de los pedidos de un negocio.
+   * * Filtra por el identificador del establecimiento y ordena los resultados 
+   * de forma descendente por fecha de creación, permitiendo que el panel 
+   * administrativo reaccione a nuevos pedidos instantáneamente.
    */
-  getOrdersByBusiness(businessId: string): Observable<Order[]> {
-    const ordersRef = collection(this.firestore, this.collectionName);
-    const q = query(
-      ordersRef, 
+  public getOrdersByBusiness(businessId: string): Observable<Order[]> {
+    return this.getAll([
       where('business_id', '==', businessId),
       orderBy('created_at', 'desc')
-    );
-    return collectionData(q, { idField: 'id' }) as Observable<Order[]>;
+    ]);
   }
 
   /**
-   * Obtiene el historial de pedidos de un usuario específico
+   * Recupera el historial cronológico de pedidos realizados por un usuario.
+   * * Permite al cliente visualizar su actividad pasada, obteniendo los 
+   * documentos mapeados y ordenados desde el más reciente al más antiguo.
    */
-  getOrdersByUser(userId: string): Observable<Order[]> {
-    const ordersRef = collection(this.firestore, this.collectionName);
-    const q = query(
-      ordersRef, 
+  public getOrdersByUser(userId: string): Observable<Order[]> {
+    return this.getAll([
       where('user_id', '==', userId),
       orderBy('created_at', 'desc')
-    );
-    return collectionData(q, { idField: 'id' }) as Observable<Order[]>;
+    ]);
   }
 
   /**
-   * Cambia el estado del pedido (Aceptar, Preparando, En camino, etc.)
+   * Actualiza el estado logístico de un pedido específico.
+   * * Permite la transición entre los diferentes estados del flujo (Aceptado, 
+   * Preparando, En camino, Entregado), registrando la fecha de la última 
+   * modificación de forma automática.
    */
-  async updateStatus(orderId: string, status: OrderStatus): Promise<void> {
-    const orderRef = doc(this.firestore, `${this.collectionName}/${orderId}`);
-    await updateDoc(orderRef, { status });
+  public async updateStatus(orderId: string, status: OrderStatus): Promise<void> {
+    return this.update(orderId, { 
+      status,
+      updated_at: new Date()
+    });
   }
 }
