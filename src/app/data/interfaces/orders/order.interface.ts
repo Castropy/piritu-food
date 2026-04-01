@@ -1,18 +1,24 @@
-import { Timestamp } from 'firebase/firestore';
+import { Timestamp } from '@angular/fire/firestore';
+import { OrderStatus, ServiceType } from './order-enums.interface'; // Si los tienes aparte
+import { CartItem } from '../cart/cart.interface';
 
-export type OrderStatus = 'pending' | 'accepted' | 'preparing' | 'on_way' | 'delivered' | 'cancelled' | 'rejected';
-export type ServiceType = 'pickup' | 'delivery';
 
 export interface Order {
-  id: string;               // ID del documento
+  id: string;               // ID del documento en Firestore
   business_id: string;
   business_name: string;    
-  created_at: Timestamp | Date;
-  items: any[];             // Mantenemos any[] por la estructura mixta de tu capture [uid, qty]
-  service_type: ServiceType;
-  status: OrderStatus;
-  total_price: number;
   user_id: string;
   user_name: string;        
   user_notes: string;       
+  
+  // Estructura de productos (Basada en tu CartItem para consistencia)
+  items: CartItem[]; 
+  
+  total_price: number;
+  service_type: ServiceType;
+  status: OrderStatus;
+  
+  // Auditoría de tiempos
+  created_at: Date | Timestamp;
+  updated_at: Date | Timestamp; // <--- Agregado para resolver los errores del servicio
 }
