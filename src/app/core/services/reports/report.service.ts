@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BaseFirestoreService } from '../firestore/base-firestore.service';
-import { Report, ReportStatus } from '../../../data/interfaces';
+import { Report, ReportStatus } from '../../../data/interfaces/reports/report.interface';
 import { ReportMapper } from '../../../data/mappers/reports/report.mapper';
 import { Observable } from 'rxjs';
 import { orderBy } from '@angular/fire/firestore';
@@ -8,10 +8,9 @@ import { orderBy } from '@angular/fire/firestore';
 /**
  * ReportService: Gestiona el ciclo de vida de los reportes de incidentes.
  * 
- * Este servicio permite a los usuarios notificar problemas y a los 
- * administradores gestionar su resolución. Hereda la funcionalidad 
- * de Firestore y utiliza el ReportMapper para normalizar los metadatos 
- * de soporte y auditoría.
+ * Este servicio permite registrar quejas y gestionar su resolución desde el 
+ * panel administrativo. Hereda de BaseFirestoreService para centralizar la 
+ * persistencia y utiliza un mapper para normalizar los datos.
  */
 @Injectable({
   providedIn: 'root'
@@ -19,46 +18,43 @@ import { orderBy } from '@angular/fire/firestore';
 export class ReportService extends BaseFirestoreService<Report> {
 
   constructor() {
-    // Inicializa el servicio con la colección 'reports' y su mapper dedicado
+    // Inicializa el servicio con la colección 'reports' y su mapper
     super('reports', ReportMapper);
   }
 
   /**
-   * Registra un nuevo reporte de incidencia en el sistema.
+   * Registra un nuevo reporte en la base de datos.
    * 
-   * Establece el estado inicial como 'open' y utiliza el servicio base 
-   * para persistir la información, delegando al mapper la gestión de 
-   * las marcas de tiempo y la limpieza del objeto.
+   * Asigna automáticamente el estado inicial 'open' y las marcas de tiempo 
+   * de creación y actualización.
    */
   public async createReport(report: Report): Promise<string> {
-    return this.create({
+    const reportData: Report = {
       ...report,
       status: 'open',
       created_at: new Date(),
       updated_at: new Date()
-    });
+    };
+
+    return this.create(reportData);
   }
 
   /**
-   * Actualiza el estado administrativo de un reporte específico.
+   * Actualiza el estado de un reporte (ej. de 'open' a 'resolved').
    * 
-   * Permite transicionar el reporte entre estados (abierto, en proceso, cerrado), 
-   * registrando automáticamente la fecha de la última modificación para el 
-   * seguimiento del ANS (Acuerdo de Nivel de Servicio).
+   * El método asegura que se registre la fecha exacta del cambio de estado.
    */
   public async updateReportStatus(reportId: string, status: ReportStatus): Promise<void> {
-    return this.update(reportId, { 
+    const updateData: Partial<Report> = { 
       status,
       updated_at: new Date()
-    });
+    };
+    
+    return this.update(reportId, updateData);
   }
 
   /**
-   * Recupera la totalidad de los reportes para su gestión centralizada.
-   * 
-   * Retorna un flujo de datos ordenado por fecha de creación descendente, 
-   * asegurando que los incidentes más recientes aparezcan primero en el 
-   * panel de administración.
+   * Recupera todos los reportes ordenados por fecha de creación.
    */
   public getAllReports(): Observable<Report[]> {
     return this.getAll([orderBy('created_at', 'desc')]);
