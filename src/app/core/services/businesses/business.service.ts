@@ -1,75 +1,76 @@
-// Este servicio maneja todas las operaciones relacionadas con los negocios, tanto para 
-// la vista de cliente como para la administración. Incluye métodos para obtener negocios, 
-// actualizar su estado y mantener un negocio seleccionado para edición. 
 import { Injectable, signal } from '@angular/core';
-import { 
-  Firestore, 
-  collection, 
-  collectionData, 
-  doc, 
-  docData, 
-  query, 
-  where, 
-  orderBy,
-  updateDoc,
-  Timestamp 
-} from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
+import { BaseFirestoreService } from '../firestore/base-firestore.service';
 import { Business } from '../../../data/interfaces';
+import { BusinessMapper } from '../../../data/mappers/business/business.mapper';
+import { Observable } from 'rxjs';
+import { orderBy, where } from '@angular/fire/firestore';
 
+/**
+ * BusinessService: Gestiona todas las operaciones relacionadas con los negocios.
+ * 
+ * Este servicio centraliza la lógica para la visualización de clientes, 
+ * el panel de administración y la gestión de estados de verificación. 
+ * Hereda la funcionalidad CRUD genérica del servicio base de Firestore.
+ */
 @Injectable({
   providedIn: 'root'
 })
-export class BusinessService {
-  // Signal para cuando el admin está editando un negocio específico
+export class BusinessService extends BaseFirestoreService<Business> {
+  
+  /**
+   * Mantiene el estado del negocio seleccionado actualmente para tareas 
+   * de edición o visualización detallada en el panel administrativo.
+   */
   private selectedBusinessSignal = signal<Business | null>(null);
-  readonly selectedBusiness = this.selectedBusinessSignal.asReadonly();
+  public readonly selectedBusiness = this.selectedBusinessSignal.asReadonly();
 
-  constructor(private firestore: Firestore) {}
-
-  /**
-   * Obtiene todos los negocios para el listado general
-   */
-  getAllBusinesses(): Observable<Business[]> {
-    const businessRef = collection(this.firestore, 'businesses');
-    const q = query(businessRef, orderBy('name', 'asc'));
-    return collectionData(q, { idField: 'id' }) as Observable<Business[]>;
+  constructor() {
+    // Inicializa el servicio base con la colección 'businesses' y su mapper respectivo
+    super('businesses', BusinessMapper);
   }
 
   /**
-   * Obtiene solo los negocios verificados y no bloqueados (Vista Cliente)
+   * Obtiene la totalidad de los negocios registrados, ordenados alfabéticamente por nombre.
    */
-  getVerifiedBusinesses(): Observable<Business[]> {
-    const businessRef = collection(this.firestore, 'businesses');
-    const q = query(
-      businessRef, 
-      where('is_verified', '==', true), 
-      where('is_blocked', '==', false)
-    );
-    return collectionData(q, { idField: 'id' }) as Observable<Business[]>;
+  public getAllBusinesses(): Observable<Business[]> {
+    return this.getAll([orderBy('name', 'asc')]);
   }
 
   /**
-   * Obtiene un negocio por su ID y lo guarda en el signal
+   * Recupera únicamente los negocios que han superado el proceso de verificación 
+   * y que no se encuentran bajo bloqueo administrativo.
    */
-  getBusinessById(id: string): Observable<Business> {
-    const businessRef = doc(this.firestore, `businesses/${id}`);
-    return (docData(businessRef, { idField: 'id' }) as Observable<Business>);
+  public getVerifiedBusinesses(): Observable<Business[]> {
+    return this.getAll([
+      where('is_verified', '==', true),
+      where('is_blocked', '==', false),
+      orderBy('name', 'asc')
+    ]);
   }
 
   /**
-   * Actualiza la información del negocio (ej: cambiar horario o bloquear)
+   * Consulta la información de un negocio específico mediante su identificador único.
    */
-  async updateBusiness(id: string, data: Partial<Business>): Promise<void> {
-    const businessRef = doc(this.firestore, `businesses/${id}`);
-    const updateData = { ...data, updated_at: Timestamp.now() };
-    await updateDoc(businessRef, updateData as any);
+  public getBusinessById(id: string): Observable<Business> {
+    return this.getById(id);
   }
 
   /**
-   * Selecciona un negocio para edición en el estado global
+   * Realiza actualizaciones parciales en la información de un negocio.
+   * El método asegura que la propiedad de actualización se registre correctamente.
    */
-  selectBusiness(business: Business | null) {
+  public async updateBusiness(id: string, data: Partial<Business>): Promise<void> {
+    return this.update(id, { 
+      ...data, 
+      updated_at: new Date() // El mapper se encargará de la conversión final
+    });
+  }
+
+  /**
+   * Almacena temporalmente un objeto de tipo Business en el estado global 
+   * para facilitar la comunicación entre componentes de edición.
+   */
+  public selectBusiness(business: Business | null): void {
     this.selectedBusinessSignal.set(business);
   }
 }
