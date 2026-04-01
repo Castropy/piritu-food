@@ -7,9 +7,13 @@ import {
   signOut, 
   User as FirebaseUser 
 } from '@angular/fire/auth';
-import { Firestore, doc, getDoc, setDoc, serverTimestamp } from '@angular/fire/firestore';
-import { Observable, firstValueFrom } from 'rxjs';
+import { Firestore, doc, getDoc, setDoc } from '@angular/fire/firestore';
+import { Observable } from 'rxjs';
 import { User, Business, Admin } from '../../../data/interfaces';
+// Importamos los mappers para limpiar la data antes de subirla o bajarla
+import { UserMapper } from '../../../data/mappers/user/user.mapper';
+import { BusinessMapper } from '../../../data/mappers/business/business.mapper';
+import { AdminMapper } from '../../../data/mappers/admin/admin.mapper';
 
 @Injectable({
   providedIn: 'root'
@@ -18,14 +22,14 @@ export class AuthService {
   private _auth = inject(Auth);
   private _firestore = inject(Firestore);
 
-  // Observable para cambios de estado de sesión
+  // Observable reactivo para el estado de Firebase Auth
   readonly user$: Observable<FirebaseUser | null> = authState(this._auth);
   
-  // Signal para el perfil cargado (Acceso rápido en toda la app)
+  // Signal global con el perfil tipado y mapeado
   currentUserProfile = signal<User | Business | Admin | null>(null);
 
   /**
-   * Registro diferenciado por colección
+   * Registro con creación de perfil blindado por Mappers
    */
   async signUpWithEmail(email: string, password: string, role: 'client' | 'business', extraData: any) {
     const credential = await createUserWithEmailAndPassword(this._auth, email, password);
@@ -35,18 +39,26 @@ export class AuthService {
       const collectionName = role === 'client' ? 'users' : 'businesses';
       const userRef = doc(this._firestore, `${collectionName}/${uid}`);
 
-      // Mapeo inicial basado en tus interfaces
-      const profile = {
-        id: uid,
-        email,
-        created_at: serverTimestamp(),
-        updated_at: serverTimestamp(),
-        is_blocked: false,
-        ...extraData // Aquí entran el DNI o el TaxID que debatimos
-      };
-
-      if (role === 'business') {
-        (profile as any).is_verified = false; // Negocio empieza en espera
+      // Usamos el Mapper correspondiente para asegurar integridad
+      let profile: any;
+      
+      if (role === 'client') {
+        profile = UserMapper.toFirestore({
+          id: uid,
+          email,
+          ...extraData,
+          is_blocked: false,
+          created_at: new Date()
+        } as User);
+      } else {
+        profile = BusinessMapper.toFirestore({
+          id: uid,
+          email,
+          ...extraData,
+          is_verified: false,
+          is_blocked: false,
+          created_at: new Date()
+        } as Business);
       }
 
       await setDoc(userRef, profile);
@@ -55,39 +67,43 @@ export class AuthService {
   }
 
   /**
-   * Login con Identificación Paralela de Rol
+   * Login con Identificación de Rol y Mapeo de Datos
    */
   async loginWithEmail(email: string, password: string) {
     const credential = await signInWithEmailAndPassword(this._auth, email, password);
     const uid = credential.user.uid;
 
-    // --- ESTRATEGIA PARALELA ---
-    // Lanzamos las 3 peticiones al mismo tiempo
-    const [userDoc, businessDoc, adminDoc] = await Promise.all([
+    // Estrategia paralela de búsqueda de perfil
+    const [userSnap, businessSnap, adminSnap] = await Promise.all([
       getDoc(doc(this._firestore, `users/${uid}`)),
       getDoc(doc(this._firestore, `businesses/${uid}`)),
       getDoc(doc(this._firestore, `admins/${uid}`))
     ]);
 
-    // Identificamos quién es
-    if (userDoc.exists()) {
-      const data = userDoc.data() as User;
+    // 1. Caso Cliente
+    if (userSnap.exists()) {
+      const data = UserMapper.fromFirestore(uid, userSnap.data());
       this.currentUserProfile.set(data);
       return { role: 'client', data };
     } 
 
-    if (businessDoc.exists()) {
-      const data = businessDoc.data() as Business;
-      // VALIDACIÓN DE VERIFICACIÓN (Acotación importante)
+    // 2. Caso Negocio
+    if (businessSnap.exists()) {
+      const data = BusinessMapper.fromFirestore(uid, businessSnap.data());
+      
+      // Validación de Seguridad: Si no está verificado, no entra a la App de Negocio
       if (!data.is_verified) {
+        await this.logout(); // Cerramos sesión de Auth para limpiar estado
         throw { code: 'auth/business-not-verified' };
       }
+      
       this.currentUserProfile.set(data);
       return { role: 'business', data };
     }
 
-    if (adminDoc.exists()) {
-      const data = adminDoc.data() as Admin;
+    // 3. Caso Admin
+    if (adminSnap.exists()) {
+      const data = AdminMapper.fromFirestore(uid, adminSnap.data());
       this.currentUserProfile.set(data);
       return { role: 'admin', data };
     }
@@ -95,7 +111,10 @@ export class AuthService {
     throw { code: 'auth/user-profile-not-found' };
   }
 
-  logout() {
+  /**
+   * Limpia el estado local y cierra sesión en Firebase
+   */
+  async logout() {
     this.currentUserProfile.set(null);
     return signOut(this._auth);
   }
