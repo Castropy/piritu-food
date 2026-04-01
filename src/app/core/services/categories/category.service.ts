@@ -1,67 +1,68 @@
-// Este servicio maneja las operaciones CRUD para las categorías de los menús de los negocios.
-// Se encarga de obtener las categorías ordenadas para la UI, agregar nuevas categorías 
-// y actualizar las existentes.
-// Utiliza Firestore para almacenar y recuperar los datos de las categorías, y se 
-// asegura de que solo se obtengan las categorías habilitadas para un negocio específico, 
-// ordenadas por su orden de visualización.
 import { Injectable } from '@angular/core';
-import { 
-  Firestore, 
-  collection, 
-  collectionData, 
-  query, 
-  where, 
-  orderBy, 
-  addDoc,
-  doc,
-  updateDoc,
-  Timestamp 
-} from '@angular/fire/firestore';
+import { BaseFirestoreService } from '../firestore/base-firestore.service';
+import { Category } from '../../../data/interfaces';
+import { CategoryMapper } from '../../../data/mappers/category/category.mapper';
 import { Observable } from 'rxjs';
-import { Category } from '../../../data/interfaces'; // Barrel import
+import { where, orderBy } from '@angular/fire/firestore';
 
+/**
+ * CategoryService: Gestiona el ciclo de vida de las categorías de menú.
+ * 
+ * Este servicio administra las agrupaciones de productos para cada negocio, 
+ * permitiendo una organización lógica del catálogo. Hereda las capacidades 
+ * CRUD del servicio base y utiliza un mapeador especializado para garantizar 
+ * la integridad de los metadatos de visualización.
+ */
 @Injectable({
   providedIn: 'root'
 })
-export class CategoryService {
-  private readonly collectionName = 'categories';
+export class CategoryService extends BaseFirestoreService<Category> {
 
-  constructor(private firestore: Firestore) {}
-
-  /**
-   * Obtiene las categorías de un negocio ordenadas para la UI
-   */
-  getCategoriesByBusiness(businessId: string): Observable<Category[]> {
-    const categoriesRef = collection(this.firestore, this.collectionName);
-    const q = query(
-      categoriesRef, 
-      where('business_id', '==', businessId),
-      where('is_enabled', '==', true),
-      orderBy('display_order', 'asc')
-    );
-    return collectionData(q, { idField: 'id' }) as Observable<Category[]>;
+  constructor() {
+    // Inicializa el servicio con la colección 'categories' y su mapper dedicado
+    super('categories', CategoryMapper);
   }
 
   /**
-   * Agrega una nueva categoría al menú del negocio
+   * Recupera las categorías habilitadas de un establecimiento específico.
+   * 
+   * Los resultados se filtran por el identificador del negocio y su estado 
+   * de activación, retornándolos en el orden de visualización definido 
+   * por el administrador del local.
    */
-  async addCategory(category: Omit<Category, 'id'>): Promise<void> {
-    const categoriesRef = collection(this.firestore, this.collectionName);
-    await addDoc(categoriesRef, {
+  public getCategoriesByBusiness(businessId: string): Observable<Category[]> {
+    return this.getAll([
+      where('business_id', '==', businessId),
+      where('is_enabled', '==', true),
+      orderBy('display_order', 'asc')
+    ]);
+  }
+
+  /**
+   * Registra una nueva categoría en el sistema.
+   * 
+   * Utiliza la lógica de persistencia del servicio base, la cual aplica 
+   * el mapper 'toFirestore' para estandarizar las marcas de tiempo y 
+   * limpiar la estructura del objeto antes de su inserción.
+   */
+  public async addCategory(category: Category): Promise<string> {
+    return this.create({
       ...category,
-      created_at: Timestamp.now(),
-      updated_at: Timestamp.now()
+      created_at: new Date(),
+      updated_at: new Date()
     });
   }
 
   /**
-   * Actualiza una categoría (nombre, orden, descripción)
+   * Actualiza los atributos de una categoría existente.
+   * 
+   * Permite modificaciones parciales en campos como el nombre, la descripción 
+   * o el orden de prioridad, registrando automáticamente la fecha de modificación.
    */
-  async updateCategory(id: string, data: Partial<Category>): Promise<void> {
-    const categoryRef = doc(this.firestore, `${this.collectionName}/${id}`);
-    await updateDoc(categoryRef, {
+  public async updateCategory(id: string, data: Partial<Category>): Promise<void> {
+    return this.update(id, {
       ...data,
-      updated_at: Timestamp.now()
+      updated_at: new Date()
     });
   }
 }
