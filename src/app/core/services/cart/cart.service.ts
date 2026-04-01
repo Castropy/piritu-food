@@ -1,11 +1,15 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, signal, inject } from '@angular/core';
 import { Cart, CartItem } from '../../../data/interfaces/cart/cart.interface';
 import { Product } from '../../../data/interfaces/products/product.interface';
+import { CartMapper } from '../../../data/mappers/cart/cart.mapper';
 
 /**
- * CartService: Gestiona el estado reactivo del carrito de compras.
- * * Utiliza Angular Signals para una detección de cambios eficiente y
- * sincroniza el estado con LocalStorage para persistencia entre sesiones.
+ * CartService: Gestiona el estado reactivo del carrito de compras del usuario.
+ * 
+ * Este servicio implementa un flujo de datos basado en Angular Signals para 
+ * garantizar actualizaciones instantáneas en la interfaz. Además, asegura la 
+ * persistencia local mediante el uso de LocalStorage, permitiendo que la 
+ * selección de productos sobreviva a recargas del navegador.
  */
 @Injectable({
   providedIn: 'root'
@@ -13,10 +17,14 @@ import { Product } from '../../../data/interfaces/products/product.interface';
 export class CartService {
   private readonly STORAGE_KEY = 'piritufood_cart';
 
-  // Estado inicial privado del carrito
+  /**
+   * Estado privado del carrito cargado desde el almacenamiento local.
+   */
   private _cart = signal<Cart>(this.loadFromStorage());
 
-  // Signals computados para que los componentes consuman data derivada (Read-only)
+  /**
+   * Exposición de señales computadas y de solo lectura para el consumo de componentes.
+   */
   public cart = this._cart.asReadonly();
   public items = computed(() => this._cart().items);
   public totalItems = computed(() => this._cart().total_items);
@@ -25,15 +33,19 @@ export class CartService {
   constructor() {}
 
   /**
-   * Añade un producto al carrito o incrementa su cantidad si ya existe.
-   * Valida que el producto pertenezca al mismo negocio actual.
+   * Incorpora un producto al carrito de compras.
+   * 
+   * Valida que el producto pertenezca al mismo establecimiento comercial que 
+   * los items existentes. Si el producto ya se encuentra en el carrito, 
+   * incrementa su cantidad; de lo contrario, utiliza el CartMapper para 
+   * generar una nueva entrada tipada.
    */
   public addProduct(product: Product, quantity: number = 1): boolean {
     const currentCart = this._cart();
 
-    // Regla de Oro: Solo un negocio a la vez
+    // Validación de integridad: No se permite mezclar productos de diferentes negocios
     if (currentCart.business_id && currentCart.business_id !== product.business_id) {
-      return false; // El componente debería preguntar si desea vaciar el carrito
+      return false; 
     }
 
     const existingItemIndex = currentCart.items.findIndex(
@@ -43,29 +55,22 @@ export class CartService {
     let newItems = [...currentCart.items];
 
     if (existingItemIndex > -1) {
-      // Actualizar item existente
-      const item = newItems[existingItemIndex];
-      const newQuantity = item.quantity + quantity;
-      newItems[existingItemIndex] = {
-        ...item,
-        quantity: newQuantity,
-        subtotal: newQuantity * product.price
-      };
+      // Actualiza un registro existente mediante la lógica del Mapper
+      newItems[existingItemIndex] = CartMapper.updateQuantity(
+        newItems[existingItemIndex], 
+        newItems[existingItemIndex].quantity + quantity
+      );
     } else {
-      // Agregar nuevo item
-      newItems.push({
-        product,
-        quantity,
-        subtotal: quantity * product.price
-      });
+      // Crea un nuevo item de carrito delegando el cálculo al Mapper
+      newItems.push(CartMapper.toCartItem(product, quantity));
     }
 
-    this.updateCartState(newItems, product.business_id, product.name); // Asumimos que name aquí es del negocio o manejamos la lógica en el componente
+    this.updateCartState(newItems, product.business_id, 'Negocio'); // El nombre del negocio debe venir del contexto o producto
     return true;
   }
 
   /**
-   * Elimina un item por completo o reduce su cantidad.
+   * Remueve un producto específico del carrito basándose en su identificador único.
    */
   public removeItem(productId: string): void {
     const currentCart = this._cart();
@@ -79,7 +84,7 @@ export class CartService {
   }
 
   /**
-   * Limpia el estado del carrito por completo.
+   * Restablece el estado del carrito a su configuración inicial vacía.
    */
   public clearCart(): void {
     const emptyCart: Cart = {
@@ -95,7 +100,8 @@ export class CartService {
   }
 
   /**
-   * Actualiza el signal y el storage centralizando los cálculos.
+   * Centraliza la actualización del estado reactivo y la persistencia en disco.
+   * Calcula de forma automática los totales y subtotales del carrito global.
    */
   private updateCartState(items: CartItem[], bizId: string | null, bizName: string | null): void {
     const total_items = items.reduce((acc, item) => acc + item.quantity, 0);
@@ -120,7 +126,15 @@ export class CartService {
 
   private loadFromStorage(): Cart {
     const stored = localStorage.getItem(this.STORAGE_KEY);
-    return stored ? JSON.parse(stored) : {
+    try {
+      return stored ? JSON.parse(stored) : this.getEmptyCart();
+    } catch (e) {
+      return this.getEmptyCart();
+    }
+  }
+
+  private getEmptyCart(): Cart {
+    return {
       business_id: null,
       business_name: null,
       items: [],
