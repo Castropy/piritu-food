@@ -1,39 +1,66 @@
-/* ReportService: Servicio para manejar la creación y gestión de reportes 
-de problemas en la aplicación.
-- createReport: Método para crear un nuevo reporte en Firestore.
-- updateReportStatus: Método para actualizar el estado de un reporte
- (abierto, en proceso, cerrado).
-- getAllReports: Método para obtener todos los reportes desde Firestore, 
-utilizado en el Admin Dashboard para monitorear y gestionar los reportes. */
 import { Injectable } from '@angular/core';
-import { Firestore, collection, addDoc, 
-  updateDoc, doc, collectionData, Timestamp } from '@angular/fire/firestore';
+import { BaseFirestoreService } from '../firestore/base-firestore.service';
+import { Report, ReportStatus } from '../../../data/interfaces';
+import { ReportMapper } from '../../../data/mappers/reports/report.mapper';
 import { Observable } from 'rxjs';
-import { ReportStatus } from '../../../data/interfaces';
+import { orderBy } from '@angular/fire/firestore';
 
+/**
+ * ReportService: Gestiona el ciclo de vida de los reportes de incidentes.
+ * 
+ * Este servicio permite a los usuarios notificar problemas y a los 
+ * administradores gestionar su resolución. Hereda la funcionalidad 
+ * de Firestore y utiliza el ReportMapper para normalizar los metadatos 
+ * de soporte y auditoría.
+ */
 @Injectable({
   providedIn: 'root'
 })
-export class ReportService {
-  constructor(private firestore: Firestore) {}
+export class ReportService extends BaseFirestoreService<Report> {
 
-  async createReport(report: Report): Promise<void> {
-    const reportsRef = collection(this.firestore, 'reports');
-    await addDoc(reportsRef, {
+  constructor() {
+    // Inicializa el servicio con la colección 'reports' y su mapper dedicado
+    super('reports', ReportMapper);
+  }
+
+  /**
+   * Registra un nuevo reporte de incidencia en el sistema.
+   * 
+   * Establece el estado inicial como 'open' y utiliza el servicio base 
+   * para persistir la información, delegando al mapper la gestión de 
+   * las marcas de tiempo y la limpieza del objeto.
+   */
+  public async createReport(report: Report): Promise<string> {
+    return this.create({
       ...report,
-      created_at: Timestamp.now(),
-      status: 'open' as ReportStatus
+      status: 'open',
+      created_at: new Date(),
+      updated_at: new Date()
     });
   }
 
-  // Actualizar el estado del reporte (para el Admin Dashboard)
-  async updateReportStatus(reportId: string, status: ReportStatus): Promise<void> {
-    const reportRef = doc(this.firestore, `reports/${reportId}`);
-    await updateDoc(reportRef, { status });
+  /**
+   * Actualiza el estado administrativo de un reporte específico.
+   * 
+   * Permite transicionar el reporte entre estados (abierto, en proceso, cerrado), 
+   * registrando automáticamente la fecha de la última modificación para el 
+   * seguimiento del ANS (Acuerdo de Nivel de Servicio).
+   */
+  public async updateReportStatus(reportId: string, status: ReportStatus): Promise<void> {
+    return this.update(reportId, { 
+      status,
+      updated_at: new Date()
+    });
   }
 
-  getAllReports(): Observable<Report[]> {
-    const reportsRef = collection(this.firestore, 'reports');
-    return collectionData(reportsRef, { idField: 'id' }) as Observable<Report[]>;
+  /**
+   * Recupera la totalidad de los reportes para su gestión centralizada.
+   * 
+   * Retorna un flujo de datos ordenado por fecha de creación descendente, 
+   * asegurando que los incidentes más recientes aparezcan primero en el 
+   * panel de administración.
+   */
+  public getAllReports(): Observable<Report[]> {
+    return this.getAll([orderBy('created_at', 'desc')]);
   }
 }
