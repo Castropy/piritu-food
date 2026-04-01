@@ -1,15 +1,15 @@
 import { Injectable, signal } from '@angular/core';
 import { BaseFirestoreService } from '../firestore/base-firestore.service';
-import { User } from '../../../data/interfaces';
+import { User } from '../../../data/interfaces/users/user.interface';
 import { UserMapper } from '../../../data/mappers/user/user.mapper';
 import { Observable, tap } from 'rxjs';
 
 /**
  * UserService: Gestiona la persistencia y el estado reactivo del perfil de usuario.
  * 
- * Este servicio centraliza la sincronización entre Firestore y la aplicación, 
- * manteniendo un estado global (Signal) del usuario autenticado. Hereda la 
- * funcionalidad base y utiliza el UserMapper para normalizar los perfiles.
+ * Este servicio sincroniza los datos de Firestore con un Signal global para
+ * que toda la aplicación tenga acceso al perfil del usuario autenticado en
+ * tiempo real. Hereda del servicio base y utiliza el UserMapper para normalizar datos.
  */
 @Injectable({
   providedIn: 'root'
@@ -17,22 +17,19 @@ import { Observable, tap } from 'rxjs';
 export class UserService extends BaseFirestoreService<User> {
   
   /**
-   * Estado reactivo que almacena la información del perfil del usuario actual.
-   * Se expone como solo lectura para proteger la integridad del estado desde los componentes.
+   * Signal privado para el estado del usuario.
+   * Se expone como readonly para mantener la unidireccionalidad de los datos.
    */
   private userSignal = signal<User | null>(null);
   public readonly currentUser = this.userSignal.asReadonly();
   
   constructor() {
-    // Inicializa el servicio con la colección 'users' y su mapper dedicado
+    // Inicializa con la colección 'users' y su mapper
     super('users', UserMapper);
   }
 
   /**
-   * Recupera el perfil de un usuario desde Firestore y actualiza el estado local.
-   * 
-   * Utiliza un pipe con 'tap' para asegurar que cualquier cambio en el 
-   * documento de Firestore se refleje inmediatamente en el Signal de la aplicación.
+   * Obtiene el perfil de un usuario por su ID y actualiza el Signal local.
    */
   public getUserProfile(id: string): Observable<User> {
     return this.getById(id).pipe(
@@ -41,10 +38,11 @@ export class UserService extends BaseFirestoreService<User> {
   }
 
   /**
-   * Crea un nuevo perfil de usuario con valores iniciales por defecto.
+   * Crea un nuevo perfil de usuario en Firestore.
    * 
-   * Establece las propiedades de seguridad (is_blocked) y reputación (status_multa),
-   * persistiendo el objeto a través del servicio base y sincronizando el estado reactivo.
+   * Nota: Utilizamos el método 'create' del BaseFirestoreService. 
+   * Si el BaseFirestoreService no acepta un ID manual en 'create', 
+   * se debe asegurar de que la implementación del padre use setDoc internamente.
    */
   public async createUserProfile(user: User): Promise<string> {
     const userData: User = {
@@ -55,17 +53,15 @@ export class UserService extends BaseFirestoreService<User> {
       updated_at: new Date()
     };
 
-    // Usamos 'setWithId' para asegurar que el ID de Auth coincida con el de Firestore
-    await this.setWithId(user.id, userData);
+    // Si tu BaseFirestoreService usa 'create' con un segundo parámetro para el ID:
+    await this.create(userData, user.id); 
+    
     this.userSignal.set(userData);
     return user.id;
   }
 
   /**
-   * Actualiza parcialmente la información del perfil de un usuario.
-   * 
-   * Realiza la modificación en Firestore y, si el usuario actualizado es el 
-   * actual, sincroniza el Signal local para mantener la coherencia en la UI.
+   * Actualiza los datos del perfil y sincroniza el estado reactivo.
    */
   public async updateProfile(id: string, data: Partial<User>): Promise<void> {
     const updateData = { 
@@ -75,15 +71,15 @@ export class UserService extends BaseFirestoreService<User> {
     
     await this.update(id, updateData);
     
-    // Sincronización manual del Signal para cambios inmediatos sin esperar al stream
     const current = this.userSignal();
     if (current && current.id === id) {
-      this.userSignal.set({ ...current, ...updateData });
+      // Fusionamos el estado actual con los nuevos cambios
+      this.userSignal.set({ ...current, ...updateData } as User);
     }
   }
 
   /**
-   * Restablece el estado del usuario local, usualmente invocado durante el logout.
+   * Limpia el estado del usuario (útil para el logout).
    */
   public clearStatus(): void {
     this.userSignal.set(null);

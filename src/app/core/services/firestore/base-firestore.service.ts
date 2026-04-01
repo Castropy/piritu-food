@@ -5,8 +5,8 @@ import {
   collectionData, 
   doc, 
   docData, 
-  getDoc,
   addDoc,
+  setDoc,
   updateDoc,
   deleteDoc,
   query, 
@@ -19,10 +19,10 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 /**
- * BaseFirestoreService: Evolución del FirestoreService original.
+ * BaseFirestoreService: Provee una capa de abstracción CRUD genérica.
  * 
- * Implementa un CRUD genérico que integra automáticamente los Mappers de la capa data.
- * T: Interfaz de Negocio (ej: Product).
+ * Integra automáticamente los Mappers para transformar datos entre 
+ * Firestore y las interfaces de negocio de la aplicación.
  */
 export abstract class BaseFirestoreService<T extends { id?: string }> {
   
@@ -36,7 +36,7 @@ export abstract class BaseFirestoreService<T extends { id?: string }> {
     }
   ) {}
 
-  // --- MÉTODOS DE LECTURA (READ) ---
+  // --- LECTURA ---
 
   protected getAll(constraints: QueryConstraint[] = []): Observable<T[]> {
     const colRef = collection(this.firestore, this.path);
@@ -56,40 +56,39 @@ export abstract class BaseFirestoreService<T extends { id?: string }> {
     );
   }
 
-  /**
-   * Reemplaza a 'getFiltered' del servicio anterior.
-   */
   protected getWhere(field: string, value: any, max: number = 20): Observable<T[]> {
     return this.getAll([where(field, '==', value), limit(max)]);
   }
 
-  // --- MÉTODOS DE ESCRITURA (WRITE) ---
+  // --- ESCRITURA ---
 
   /**
-   * Crea un documento usando el Mapper 'toFirestore' para limpiar la data.
+   * Crea un documento en Firestore.
+   * @param item Datos del objeto a crear.
+   * @param customId (Opcional) Si se provee, se usará como ID del documento (ej. UID de Auth).
    */
-  protected async create(item: T): Promise<string> {
-    const colRef = collection(this.firestore, this.path);
+  protected async create(item: T, customId?: string): Promise<string> {
     const data = this.mapper.toFirestore(item);
-    // Eliminamos el ID si existe para que Firestore genere uno nuevo
-    delete data.id; 
     
-    const docRef = await addDoc(colRef, data);
-    return docRef.id;
+    // Limpieza: El ID no debe persistirse dentro del cuerpo del documento
+    if (data.id) delete data.id; 
+
+    if (customId) {
+      const docRef = doc(this.firestore, `${this.path}/${customId}`);
+      await setDoc(docRef, data);
+      return customId;
+    } else {
+      const colRef = collection(this.firestore, this.path);
+      const docRef = await addDoc(colRef, data);
+      return docRef.id;
+    }
   }
 
-  /**
-   * Actualiza un documento existente.
-   */
   protected async update(id: string, data: Partial<T>): Promise<void> {
     const docRef = doc(this.firestore, `${this.path}/${id}`);
-    // Aquí podrías opcionalmente pasar data por un mapper de actualización si fuera necesario
     return updateDoc(docRef, data as DocumentData);
   }
 
-  /**
-   * Elimina un documento.
-   */
   protected async delete(id: string): Promise<void> {
     const docRef = doc(this.firestore, `${this.path}/${id}`);
     return deleteDoc(docRef);
