@@ -1,79 +1,79 @@
-/* este servicio se encarga de manejar todas las operaciones relacionadas 
-con los productos, como obtener la lista de productos de un negocio,
- agregar nuevos productos y actualizar los existentes.
-  Se utiliza Firestore para almacenar y recuperar los datos de los productos. */
 import { Injectable } from '@angular/core';
-import { 
-  Firestore, 
-  collection, 
-  collectionData, 
-  doc, 
-  docData, 
-  query, 
-  where, 
-  orderBy,
-  addDoc,
-  updateDoc,
-  Timestamp 
-} from '@angular/fire/firestore';
+import { BaseFirestoreService } from '../firestore/base-firestore.service';
+import { Product } from '../../../data/interfaces';
+import { ProductMapper } from '../../../data/mappers/products/product.mapper';
 import { Observable } from 'rxjs';
-import { Product } from '../../../data/interfaces'; // Barrel import
+import { where, orderBy } from '@angular/fire/firestore';
 
+/**
+ * ProductService: Gestiona el catálogo de productos de los establecimientos.
+ * 
+ * Este servicio centraliza las consultas de productos para la vista de clientes
+ * y la gestión de inventario para los negocios. Hereda la funcionalidad base 
+ * de Firestore y utiliza el ProductMapper para normalizar los datos del catálogo.
+ */
 @Injectable({
   providedIn: 'root'
 })
-export class ProductService {
-  private readonly collectionName = 'products';
+export class ProductService extends BaseFirestoreService<Product> {
 
-  constructor(private firestore: Firestore) {}
-
-  /**
-   * Obtiene todos los productos de un negocio específico (Vista Cliente/Negocio)
-   */
-  getProductsByBusiness(businessId: string): Observable<Product[]> {
-    const productsRef = collection(this.firestore, this.collectionName);
-    const q = query(
-      productsRef, 
-      where('business_id', '==', businessId),
-      orderBy('name', 'asc')
-    );
-    return collectionData(q, { idField: 'id' }) as Observable<Product[]>;
+  constructor() {
+    // Inicializa el servicio con la colección 'products' y su mapper dedicado
+    super('products', ProductMapper);
   }
 
   /**
-   * Obtiene solo los productos habilitados (Vista Cliente)
+   * Obtiene la totalidad de productos asociados a un negocio específico.
+   * 
+   * Retorna todos los artículos, independientemente de su estado de 
+   * habilitación, ordenados alfabéticamente para facilitar la gestión administrativa.
    */
-  getAvailableProductsByBusiness(businessId: string): Observable<Product[]> {
-    const productsRef = collection(this.firestore, this.collectionName);
-    const q = query(
-      productsRef, 
+  public getProductsByBusiness(businessId: string): Observable<Product[]> {
+    return this.getAll([
+      where('business_id', '==', businessId),
+      orderBy('name', 'asc')
+    ]);
+  }
+
+  /**
+   * Recupera únicamente los productos disponibles para la venta.
+   * 
+   * Filtra por el identificador del negocio y asegura que la propiedad 
+   * 'is_enabled' sea verdadera, optimizando la experiencia del cliente final.
+   */
+  public getAvailableProductsByBusiness(businessId: string): Observable<Product[]> {
+    return this.getAll([
       where('business_id', '==', businessId),
       where('is_enabled', '==', true),
       orderBy('name', 'asc')
-    );
-    return collectionData(q, { idField: 'id' }) as Observable<Product[]>;
+    ]);
   }
 
   /**
-   * Agrega un nuevo producto al catálogo
+   * Incorpora un nuevo producto al catálogo del negocio.
+   * 
+   * Utiliza la infraestructura del servicio base para crear el documento,
+   * asignando automáticamente marcas de tiempo que el mapper procesará 
+   * antes de la persistencia en Firestore.
    */
-  async addProduct(product: Omit<Product, 'id'>): Promise<void> {
-    const productsRef = collection(this.firestore, this.collectionName);
-    await addDoc(productsRef, {
+  public async addProduct(product: Product): Promise<string> {
+    return this.create({
       ...product,
-      created_at: Timestamp.now(),
-      updated_at: Timestamp.now()
+      created_at: new Date(),
+      updated_at: new Date()
     });
   }
 
   /**
-   * Actualiza datos del producto (precio, stock, etc.)
+   * Actualiza la información técnica o comercial de un producto existente.
+   * 
+   * Permite modificaciones parciales (precio, descripción, stock) y registra
+   * la fecha de actualización para el control de cambios en el inventario.
    */
-  async updateProduct(id: string, data: Partial<Product>): Promise<void> {
-    const productRef = doc(this.firestore, `${this.collectionName}/${id}`);
-    await updateDoc(productRef, {
+  public async updateProduct(id: string, data: Partial<Product>): Promise<void> {
+    return this.update(id, {
       ...data,
-      updated_at: Timestamp.now()
+      updated_at: new Date()
     });
   }
 }
