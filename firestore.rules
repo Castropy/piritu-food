@@ -1,0 +1,69 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // --- FUNCIONES DE APOYO (REUTILIZABLES) ---
+    
+    // Verifica si el usuario está autenticado
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Obtiene el rol del usuario desde su documento de perfil en Firestore
+    function getUserRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    // Verifica si el usuario es dueño del documento que intenta tocar
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    // --- REGLAS POR COLECCIÓN ---
+
+    // 1. Colección de Usuarios
+    match /users/{userId} {
+      allow read: if isSignedIn(); 
+      // Solo el dueño puede crear su perfil inicial o editarlo
+      allow create, update: if isSignedIn() && isOwner(userId);
+      // El Admin puede leer y editar cualquier perfil (para bloqueos o cambios de rol)
+      allow write: if isSignedIn() && getUserRole() == 'admin';
+    }
+
+    // 2. Colección de Negocios (Businesses)
+    match /businesses/{businessId} {
+      // Cualquiera puede ver los negocios (para el Lobby y la Store)
+      allow read: if true;
+      // Solo el Admin puede crear o validar un negocio (is_verified)
+      allow create, delete: if isSignedIn() && getUserRole() == 'admin';
+      // El dueño del negocio puede actualizar sus datos (horario, tlf)
+      allow update: if isSignedIn() && (isOwner(businessId) || getUserRole() == 'admin');
+    }
+
+    // 3. Colección de Productos
+    match /products/{productId} {
+      allow read: if true; // Lectura pública para el catálogo
+      // Solo usuarios con rol 'business' pueden crear productos
+      // Deben ser dueños del campo business_id en el producto
+      allow create, update, delete: if isSignedIn() && 
+        (getUserRole() == 'business' && request.resource.data.business_id == request.auth.uid) ||
+        getUserRole() == 'admin';
+    }
+
+    // 4. Colección de Pedidos (Orders)
+    match /orders/{orderId} {
+      // Un cliente solo ve sus propios pedidos
+      // Un negocio solo ve pedidos donde el field business_id coincida con su UID
+      allow read: if isSignedIn() && (
+        isOwner(resource.data.client_id) || 
+        isOwner(resource.data.business_id) || 
+        getUserRole() == 'admin'
+      );
+      // Solo el cliente crea el pedido
+      allow create: if isSignedIn() && getUserRole() == 'client';
+      // Negocio actualiza estado (pending -> delivered), Cliente puede cancelar si sigue pending
+      allow update: if isSignedIn();
+    }
+  }
+}
