@@ -1,69 +1,116 @@
-<div class="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+<div class="relative min-h-screen w-full flex items-center justify-center overflow-hidden font-sans bg-black">
   
-  <div class="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 space-y-6">
-    
-    <div class="text-center">
-      <h1 class="text-3xl font-bold text-orange-600">PírituFood</h1>
-      <p class="text-gray-500">{{ authMode() === 'login' ? '¡Qué bueno verte, socio!' : 'Únete a la comunidad' }}</p>
-    </div>
-
-    <div *ngIf="authMode() === 'register'" class="flex bg-gray-100 p-1 rounded-xl">
-      <button (click)="setUserType('client')" 
-              [className]="userType() === 'client' ? 'w-1/2 py-2 rounded-lg bg-white shadow-sm font-semibold' : 'w-1/2 py-2 text-gray-500'">
-        Cliente
-      </button>
-      <button (click)="setUserType('business')" 
-              [className]="userType() === 'business' ? 'w-1/2 py-2 rounded-lg bg-white shadow-sm font-semibold' : 'w-1/2 py-2 text-gray-500'">
-        Negocio
-      </button>
-    </div>
-
-    <form [formGroup]="authForm" (ngSubmit)="onSubmit()" class="space-y-4">
-      
-      <div>
-        <label class="block text-sm font-medium text-gray-700">Correo Electrónico</label>
-        <input type="email" formControlName="email" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm p-2 border">
-      </div>
-
-      <div>
-        <label class="block text-sm font-medium text-gray-700">Contraseña</label>
-        <input type="password" formControlName="password" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm p-2 border">
-      </div>
-
-      <ng-container *ngIf="authMode() === 'register'">
-        
-        <div *ngIf="userType() === 'client'" class="space-y-4 animate-fade-in">
-          <input type="text" formControlName="firstName" placeholder="Nombre" class="w-full p-2 border rounded-md">
-          <input type="text" formControlName="lastName" placeholder="Apellido" class="w-full p-2 border rounded-md">
-          <input type="text" formControlName="dni" placeholder="DNI / Cédula" class="w-full p-2 border rounded-md">
-        </div>
-
-        <div *ngIf="userType() === 'business'" class="space-y-4 animate-fade-in">
-          <input type="text" formControlName="businessName" placeholder="Nombre del Negocio" class="w-full p-2 border rounded-md">
-          <input type="text" formControlName="taxId" placeholder="RIF / Tax ID" class="w-full p-2 border rounded-md">
-          <input type="text" formControlName="phone" placeholder="Teléfono de contacto" class="w-full p-2 border rounded-md">
-        </div>
-
-      </ng-container>
-
-      <div *ngIf="errorMessage()" class="bg-red-50 text-red-600 p-3 rounded-lg text-sm border border-red-200">
-        {{ errorMessage() }}
-      </div>
-
-      <button type="submit" 
-              [disabled]="isLoading()"
-              class="w-full py-3 px-4 border border-transparent rounded-xl shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 font-bold transition-all disabled:opacity-50">
-        <span *ngIf="!isLoading()">{{ authMode() === 'login' ? 'Entrar' : 'Registrarme' }}</span>
-        <span *ngIf="isLoading()">Procesando...</span>
-      </button>
-
-    </form>
-
-    <div class="text-center">
-      <button (click)="toggleMode()" class="text-orange-600 hover:underline text-sm font-medium">
-        {{ authMode() === 'login' ? '¿No tienes cuenta? Crea una aquí' : '¿Ya eres socio? Inicia sesión' }}
-      </button>
-    </div>
-
+  <!-- 🖼️ Fondo Dinámico (Mismo motor que el Lobby) -->
+  <div class="absolute inset-0 w-full h-full">
+    @for (img of images(); track img; let i = $index) {
+      <img [src]="img" 
+           class="absolute inset-0 w-full h-full object-cover transition-opacity duration-2000ms ease-in-out scale-105"
+           [class.opacity-60]="activeImageIndex() === i"
+           [class.opacity-0]="activeImageIndex() !== i"
+           [alt]="'PírituFood Auth Background'">
+    }
+    <!-- Overlay gradiente para dar profundidad -->
+    <div class="absolute inset-0 bg-linear-to-br from-black/80 via-black/40 to-orange-900/30 backdrop-blur-[3px]"></div>
   </div>
+
+  <!-- 💳 Contenedor del Formulario (Glassmorphism) -->
+  <div class="relative z-10 max-w-md w-full mx-4">
+    <div class="bg-white/95 backdrop-blur-xl rounded-[2.5rem] shadow-2xl p-8 md:p-10 border border-white/20 space-y-8 transition-all duration-500">
+      
+      <!-- Header -->
+      <div class="text-center space-y-2">
+        <h1 class="text-4xl font-black text-orange-600 italic uppercase tracking-tighter">PírituFood</h1>
+        <p class="text-gray-500 font-bold uppercase text-xs tracking-widest">
+          {{ authMode() === 'login' ? '¡Qué bueno verte, socio!' : 'Únete a la comunidad de Píritu' }}
+        </p>
+      </div>
+
+      <!-- Selector de Tipo de Usuario (Solo en Registro) -->
+      @if (authMode() === 'register') {
+        <div class="flex bg-gray-100/80 p-1.5 rounded-2xl border border-gray-200">
+          <button (click)="setUserType('client')" 
+                  class="w-1/2 py-3 rounded-xl font-black text-sm uppercase transition-all"
+                  [class="userType() === 'client' ? 'bg-white text-orange-600 shadow-md scale-100' : 'text-gray-400 hover:text-gray-600'"]>
+            🙋‍♂️ Cliente
+          </button>
+          <button (click)="setUserType('business')" 
+                  class="w-1/2 py-3 rounded-xl font-black text-sm uppercase transition-all"
+                  [class="userType() === 'business' ? 'bg-white text-orange-600 shadow-md scale-100' : 'text-gray-400 hover:text-gray-600'"]>
+            🏪 Negocio
+          </button>
+        </div>
+      }
+
+      <!-- Formulario Principal -->
+      <form [formGroup]="authForm" (ngSubmit)="onSubmit()" class="space-y-5">
+        
+        <div class="space-y-4">
+          <div class="relative">
+            <input type="email" formControlName="email" placeholder="Correo Electrónico" 
+                   class="w-full p-4 pl-5 bg-gray-50 border-2 border-transparent rounded-2xl focus:border-orange-500 focus:bg-white outline-none transition-all font-medium text-gray-700 shadow-sm">
+          </div>
+
+          <div class="relative">
+            <input type="password" formControlName="password" placeholder="Contraseña" 
+                   class="w-full p-4 pl-5 bg-gray-50 border-2 border-transparent rounded-2xl focus:border-orange-500 focus:bg-white outline-none transition-all font-medium text-gray-700 shadow-sm">
+          </div>
+        </div>
+
+        <!-- Campos Dinámicos según el tipo -->
+        @if (authMode() === 'register') {
+          <div class="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            
+            @if (userType() === 'client') {
+              <div class="grid grid-cols-2 gap-4">
+                <input type="text" formControlName="firstName" placeholder="Nombre" class="w-full p-4 bg-gray-50 rounded-2xl border-2 border-transparent focus:border-orange-500 outline-none transition-all shadow-sm">
+                <input type="text" formControlName="lastName" placeholder="Apellido" class="w-full p-4 bg-gray-50 rounded-2xl border-2 border-transparent focus:border-orange-500 outline-none transition-all shadow-sm">
+              </div>
+              <input type="text" formControlName="dni" placeholder="Cédula de Identidad" class="w-full p-4 bg-gray-50 rounded-2xl border-2 border-transparent focus:border-orange-500 outline-none transition-all shadow-sm">
+            }
+
+            @if (userType() === 'business') {
+              <input type="text" formControlName="businessName" placeholder="Nombre del Negocio" class="w-full p-4 bg-gray-50 rounded-2xl border-2 border-transparent focus:border-orange-500 outline-none transition-all shadow-sm">
+              <input type="text" formControlName="taxId" placeholder="RIF del Negocio" class="w-full p-4 bg-gray-50 rounded-2xl border-2 border-transparent focus:border-orange-500 outline-none transition-all shadow-sm">
+              <input type="text" formControlName="phone" placeholder="WhatsApp de contacto" class="w-full p-4 bg-gray-50 rounded-2xl border-2 border-transparent focus:border-orange-500 outline-none transition-all shadow-sm">
+            }
+
+          </div>
+        }
+
+        <!-- Errores -->
+        @if (errorMessage()) {
+          <div class="bg-red-50 text-red-600 p-4 rounded-2xl text-sm font-bold border border-red-100 flex items-center gap-2">
+            <span class="text-lg">⚠️</span> {{ errorMessage() }}
+          </div>
+        }
+
+        <!-- Botón de Acción -->
+        <button type="submit" 
+                [disabled]="isLoading()"
+                class="w-full py-5 rounded-1.5rem shadow-xl text-white bg-orange-600 hover:bg-orange-700 hover:shadow-orange-500/30 focus:outline-none focus:ring-4 focus:ring-orange-500/50 font-black text-lg uppercase tracking-wider transition-all active:scale-95 disabled:opacity-50">
+          @if (!isLoading()) {
+            {{ authMode() === 'login' ? 'Entrar ahora' : 'Crear mi cuenta' }}
+          } @else {
+            <span class="flex items-center justify-center gap-2">
+              <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Cocinando...
+            </span>
+          }
+        </button>
+
+      </form>
+
+      <!-- Toggle Mode -->
+      <div class="text-center pt-2">
+        <button (click)="toggleMode()" class="text-gray-500 hover:text-orange-600 text-sm font-bold uppercase tracking-tight transition-colors">
+          {{ authMode() === 'login' ? '¿Aún no tienes cuenta? Regístrate' : '¿Ya eres socio? Inicia sesión' }}
+        </button>
+      </div>
+
+    </div>
+  </div>
+
 </div>

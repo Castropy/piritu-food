@@ -6,6 +6,7 @@ import { Subject } from 'rxjs';
 
 import { User, Business } from '../../../data/interfaces';
 import { AuthService } from '../../../core/services/auth/auth.service';
+import { LOBBY_IMAGES } from '../../../shared/assets/lobby-images.assets';
 
 type AuthMode = 'login' | 'register';
 type UserType = 'client' | 'business';
@@ -26,6 +27,9 @@ export class AuthComponent implements OnDestroy {
   public userType = signal<UserType>('client');
   public isLoading = signal<boolean>(false);
   public errorMessage = signal<string | null>(null);
+  
+  // Imágenes del carrusel (pueden ser estáticas o dinámicas)
+  images = signal<string[]>(LOBBY_IMAGES);
 
   public authForm: FormGroup = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
