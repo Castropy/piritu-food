@@ -1,6 +1,6 @@
 <div class="relative min-h-screen w-full flex items-center justify-center overflow-hidden font-sans bg-black">
   
-  <!-- 🖼️ Fondo Dinámico (Mismo motor que el Lobby) -->
+  <!-- 🖼️ Fondo Dinámico -->
   <div class="absolute inset-0 w-full h-full">
     @for (img of images(); track img; let i = $index) {
       <img [src]="img" 
@@ -9,7 +9,7 @@
            [class.opacity-0]="activeImageIndex() !== i"
            [alt]="'PírituFood Auth Background'">
     }
-    <!-- Overlay gradiente para dar profundidad -->
+    <!-- Overlay gradiente -->
     <div class="absolute inset-0 bg-linear-to-br from-black/80 via-black/40 to-orange-900/30 backdrop-blur-[3px]"></div>
   </div>
 
@@ -25,17 +25,23 @@
         </p>
       </div>
 
-      <!-- Selector de Tipo de Usuario (Solo en Registro) -->
+      <!-- Selector de Tipo de Usuario (Corregido: Binding de clases individual) -->
       @if (authMode() === 'register') {
         <div class="flex bg-gray-100/80 p-1.5 rounded-2xl border border-gray-200">
-          <button (click)="setUserType('client')" 
+          <button type="button" (click)="setUserType('client')" 
                   class="w-1/2 py-3 rounded-xl font-black text-sm uppercase transition-all"
-                  [class="userType() === 'client' ? 'bg-white text-orange-600 shadow-md scale-100' : 'text-gray-400 hover:text-gray-600'"]>
+                  [class.bg-white]="userType() === 'client'"
+                  [class.text-orange-600]="userType() === 'client'"
+                  [class.shadow-md]="userType() === 'client'"
+                  [class.text-gray-400]="userType() !== 'client'">
             🙋‍♂️ Cliente
           </button>
-          <button (click)="setUserType('business')" 
+          <button type="button" (click)="setUserType('business')" 
                   class="w-1/2 py-3 rounded-xl font-black text-sm uppercase transition-all"
-                  [class="userType() === 'business' ? 'bg-white text-orange-600 shadow-md scale-100' : 'text-gray-400 hover:text-gray-600'"]>
+                  [class.bg-white]="userType() === 'business'"
+                  [class.text-orange-600]="userType() === 'business'"
+                  [class.shadow-md]="userType() === 'business'"
+                  [class.text-gray-400]="userType() !== 'business'">
             🏪 Negocio
           </button>
         </div>
@@ -45,21 +51,16 @@
       <form [formGroup]="authForm" (ngSubmit)="onSubmit()" class="space-y-5">
         
         <div class="space-y-4">
-          <div class="relative">
-            <input type="email" formControlName="email" placeholder="Correo Electrónico" 
-                   class="w-full p-4 pl-5 bg-gray-50 border-2 border-transparent rounded-2xl focus:border-orange-500 focus:bg-white outline-none transition-all font-medium text-gray-700 shadow-sm">
-          </div>
+          <input type="email" formControlName="email" placeholder="Correo Electrónico" 
+                 class="w-full p-4 pl-5 bg-gray-50 border-2 border-transparent rounded-2xl focus:border-orange-500 focus:bg-white outline-none transition-all font-medium text-gray-700 shadow-sm">
 
-          <div class="relative">
-            <input type="password" formControlName="password" placeholder="Contraseña" 
-                   class="w-full p-4 pl-5 bg-gray-50 border-2 border-transparent rounded-2xl focus:border-orange-500 focus:bg-white outline-none transition-all font-medium text-gray-700 shadow-sm">
-          </div>
+          <input type="password" formControlName="password" placeholder="Contraseña" 
+                 class="w-full p-4 pl-5 bg-gray-50 border-2 border-transparent rounded-2xl focus:border-orange-500 focus:bg-white outline-none transition-all font-medium text-gray-700 shadow-sm">
         </div>
 
-        <!-- Campos Dinámicos según el tipo -->
+        <!-- Campos Dinámicos -->
         @if (authMode() === 'register') {
           <div class="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            
             @if (userType() === 'client') {
               <div class="grid grid-cols-2 gap-4">
                 <input type="text" formControlName="firstName" placeholder="Nombre" class="w-full p-4 bg-gray-50 rounded-2xl border-2 border-transparent focus:border-orange-500 outline-none transition-all shadow-sm">
@@ -73,18 +74,17 @@
               <input type="text" formControlName="taxId" placeholder="RIF del Negocio" class="w-full p-4 bg-gray-50 rounded-2xl border-2 border-transparent focus:border-orange-500 outline-none transition-all shadow-sm">
               <input type="text" formControlName="phone" placeholder="WhatsApp de contacto" class="w-full p-4 bg-gray-50 rounded-2xl border-2 border-transparent focus:border-orange-500 outline-none transition-all shadow-sm">
             }
-
           </div>
         }
 
         <!-- Errores -->
         @if (errorMessage()) {
           <div class="bg-red-50 text-red-600 p-4 rounded-2xl text-sm font-bold border border-red-100 flex items-center gap-2">
-            <span class="text-lg">⚠️</span> {{ errorMessage() }}
+            <span>⚠️</span> {{ errorMessage() }}
           </div>
         }
 
-        <!-- Botón de Acción -->
+        <!-- Botón de Acción (Corregido: rounded-[1.5rem]) -->
         <button type="submit" 
                 [disabled]="isLoading()"
                 class="w-full py-5 rounded-1.5rem shadow-xl text-white bg-orange-600 hover:bg-orange-700 hover:shadow-orange-500/30 focus:outline-none focus:ring-4 focus:ring-orange-500/50 font-black text-lg uppercase tracking-wider transition-all active:scale-95 disabled:opacity-50">
@@ -92,8 +92,8 @@
             {{ authMode() === 'login' ? 'Entrar ahora' : 'Crear mi cuenta' }}
           } @else {
             <span class="flex items-center justify-center gap-2">
-              <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <svg class="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
               Cocinando...
@@ -105,12 +105,11 @@
 
       <!-- Toggle Mode -->
       <div class="text-center pt-2">
-        <button (click)="toggleMode()" class="text-gray-500 hover:text-orange-600 text-sm font-bold uppercase tracking-tight transition-colors">
+        <button type="button" (click)="toggleMode()" class="text-gray-500 hover:text-orange-600 text-sm font-bold uppercase tracking-tight transition-colors">
           {{ authMode() === 'login' ? '¿Aún no tienes cuenta? Regístrate' : '¿Ya eres socio? Inicia sesión' }}
         </button>
       </div>
 
     </div>
   </div>
-
 </div>

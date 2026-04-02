@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnDestroy } from '@angular/core';
+import { Component, inject, signal, OnDestroy, OnInit } from '@angular/core'; // Añadido OnInit
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -17,7 +17,7 @@ type UserType = 'client' | 'business';
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './auth.component.html',
 })
-export class AuthComponent implements OnDestroy {
+export class AuthComponent implements OnInit, OnDestroy { // Implementamos OnInit
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
@@ -28,7 +28,10 @@ export class AuthComponent implements OnDestroy {
   public isLoading = signal<boolean>(false);
   public errorMessage = signal<string | null>(null);
   
-  // Imágenes del carrusel (pueden ser estáticas o dinámicas)
+  // 1. Añadimos el índice activo para el carrusel
+  public activeImageIndex = signal<number>(0);
+  private imageInterval: any;
+
   images = signal<string[]>(LOBBY_IMAGES);
 
   public authForm: FormGroup = this.fb.group({
@@ -43,7 +46,20 @@ export class AuthComponent implements OnDestroy {
     address: ['']
   });
 
+  // 2. Iniciamos el temporizador al cargar el componente
+  ngOnInit(): void {
+    this.imageInterval = setInterval(() => {
+      this.activeImageIndex.update(index => 
+        (index + 1) % this.images().length
+      );
+    }, 5000); // Cambia cada 5 segundos para que no sea estresante
+  }
+
+  // 3. Limpiamos el intervalo para evitar que el navegador explote en segundo plano
   ngOnDestroy(): void {
+    if (this.imageInterval) {
+      clearInterval(this.imageInterval);
+    }
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -114,7 +130,7 @@ export class AuthComponent implements OnDestroy {
         address: rawData.address || '',
         email,
         description: 'Nuevo negocio en PírituFood',
-        image_url: '', // Logo por defecto
+        image_url: '', 
         gallery_urls: [],
         opening_time: '08:00',
         closing_time: '22:00',
