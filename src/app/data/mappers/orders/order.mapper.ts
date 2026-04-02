@@ -4,24 +4,22 @@ import { Order, OrderStatus, ServiceType } from '../../interfaces';
 /**
  * OrderMapper: Responsable de la transformación de pedidos.
  * 
- * Este mapper es vital para el flujo de caja y operación, ya que normaliza
- * los estados del pedido y asegura que los totales numéricos sean exactos
- * para evitar errores en la facturación o en la vista del cliente.
+ * Este mapper asegura que los totales sean exactos y que las fechas de 
+ * auditoría (creación y actualización) estén siempre presentes y normalizadas.
  */
 export class OrderMapper {
 
   /**
    * Transforma un documento de Firestore a la interfaz Order.
-   * @param id El ID del documento del pedido.
-   * @param data Atributos del pedido en Firestore.
    */
-  static fromFirestore(id: string, data: Omit<Order, 'id'>): Order {
+  static fromFirestore(id: string, data: any): Order {
     return {
       id,
       business_id: data.business_id || '',
       business_name: data.business_name || 'Negocio PírituFood',
       created_at: this.mapDate(data.created_at),
-      // Mantenemos la estructura de array mixto [uid, qty] enviada desde Firestore
+      // Se agrega updated_at con fallback al created_at para consistencia
+      updated_at: this.mapDate(data.updated_at || data.created_at),
       items: Array.isArray(data.items) ? data.items : [],
       service_type: (data.service_type as ServiceType) || 'pickup',
       status: (data.status as OrderStatus) || 'pending',
@@ -40,6 +38,8 @@ export class OrderMapper {
       business_id: order.business_id,
       business_name: order.business_name,
       created_at: order.created_at || new Date(),
+      // Se fuerza la actualización de la fecha al persistir
+      updated_at: new Date(),
       items: order.items,
       service_type: order.service_type,
       status: order.status,
@@ -53,7 +53,7 @@ export class OrderMapper {
   /**
    * Normalización estricta de fechas para reportes y logs de pedidos.
    */
-  private static mapDate(date: Timestamp | Date | undefined): Date {
+  private static mapDate(date: any): Date {
     if (date instanceof Timestamp) {
       return date.toDate();
     }
