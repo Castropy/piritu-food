@@ -1,59 +1,85 @@
-# PirituFood
+🍎 PírituFood - Delivery & Marketplace
+PírituFood es una plataforma moderna de delivery y gestión de pedidos diseñada específicamente para la comunidad de Píritu, Portuguesa. La aplicación conecta a los comensales con los mejores locales de comida de la zona, ofreciendo una experiencia rápida, visual e intuitiva.
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.0.4.
+🛠️ Stack Tecnológico
+El proyecto está construido sobre un ecosistema de alto rendimiento:
 
-## Development server
+Framework: Angular 19+ (usando Standalone Components y Signals).
 
-To start a local development server, run:
+Estilos: Tailwind CSS para un diseño UI/UX responsivo y moderno.
 
-```bash
+Base de Datos & Auth: Firebase para gestión en tiempo real.
+
+Testing: Vitest para pruebas unitarias ultrarrápidas.
+
+Gestión de Estado: Angular Signals para una reactividad fina y eficiente.
+
+🏗️ Arquitectura Modular
+Hemos implementado una Arquitectura Basada en Características (Feature-Based Architecture) para garantizar la escalabilidad y el mantenimiento a largo plazo. El proyecto se organiza de la siguiente manera:
+
+Estructura de Carpetas
+
+src/app/
+├── core/              # Singleton Services (Auth, Interceptors, Guards)
+├── data/              # Interfaces, Models y Mocks de datos
+├── features/          # Módulos de usuario (Lobby, Auth, Store, Dashboard)
+│   ├── auth/          # Login y Registro (Cliente/Negocio)
+│   ├── lobby/         # Landing page y búsqueda inicial
+│   └── ...            
+├── shared/            # Componentes reutilizables, Pipes y Assets comunes
+│   ├── assets/        # Configuración centralizada de imágenes/iconos
+│   └── components/    # Botones, Cards y Modales genéricos
+
+Flujo de Datos
+La aplicación utiliza un flujo unidireccional apoyado en Services que consumen APIs externas, exponiendo los datos a los componentes mediante Signals, lo que reduce la carga de procesamiento al evitar la detección de cambios global de Angular en tareas innecesarias.
+
+🚀 Instalación y Uso Local
+Sigue estos pasos para tener el entorno de desarrollo listo en tu máquina:
+
+1. Requisitos Previos
+Node.js: Versión 18.x o superior.
+
+Angular CLI: npm install -g @angular/cli.
+
+2. Clonar e Instalar
+
+# Clonar el repositorio
+git clone https://github.com/tu-usuario/piritufood.git
+
+# Entrar a la carpeta
+cd piritufood
+
+# Instalar dependencias
+npm install
+
+3. Correr Servidor de Desarrollo
+
+# Iniciar la aplicación
 ng serve
-```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Navega a http://localhost:4200/. La app se recargará automáticamente al detectar cambios.
 
-## Code scaffolding
+🧪 Calidad de Código
+Para asegurar que nada se rompa al subir cambios, contamos con:
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+Pruebas Unitarias: Ejecuta npm test para correr Vitest.
 
-```bash
-ng generate component component-name
-```
+Linter: Mantenemos un estándar de código limpio y consistente.
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+📌 Roadmap del Proyecto
+[x] Estructura modular base.
 
-```bash
-ng generate --help
-```
+[x] Landing page (Lobby) responsiva.
 
-## Building
+[x] Sistema de Autenticación dual (Cliente/Negocio).
 
-To build the project run:
+[ ] Dashboard para dueños de locales.
 
-```bash
-ng build
-```
+[ ] Carrito de compras.
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+[ ] Dashboard para admin.
 
-## Running unit tests
+✉️ Contacto: castrodevsoftware@gmail.com
+Equipo PírituFood – Desarrollado con ❤️ para Píritu, Portuguesa.
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
 
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
