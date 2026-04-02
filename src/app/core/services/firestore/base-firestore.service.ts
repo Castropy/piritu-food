@@ -20,9 +20,8 @@ import { map } from 'rxjs/operators';
 
 /**
  * BaseFirestoreService: Provee una capa de abstracción CRUD genérica.
- * 
  * Integra automáticamente los Mappers para transformar datos entre 
- * Firestore y las interfaces de negocio de la aplicación.
+ * Firestore y las interfaces de negocio.
  */
 export abstract class BaseFirestoreService<T extends { id?: string }> {
   
@@ -56,21 +55,16 @@ export abstract class BaseFirestoreService<T extends { id?: string }> {
     );
   }
 
-  protected getWhere(field: string, value: any, max: number = 20): Observable<T[]> {
-    return this.getAll([where(field, '==', value), limit(max)]);
-  }
-
   // --- ESCRITURA ---
 
   /**
    * Crea un documento en Firestore.
    * @param item Datos del objeto a crear.
-   * @param customId (Opcional) Si se provee, se usará como ID del documento (ej. UID de Auth).
+   * @param customId (Opcional) ID específico (ej. UID de Auth).
    */
   protected async create(item: T, customId?: string): Promise<string> {
     const data = this.mapper.toFirestore(item);
     
-    // Limpieza: El ID no debe persistirse dentro del cuerpo del documento
     if (data.id) delete data.id; 
 
     if (customId) {
