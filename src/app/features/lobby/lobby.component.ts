@@ -28,7 +28,7 @@ export class LobbyComponent implements OnInit, OnDestroy {
   // Signals de UI
   currentHook = signal<string>('¿Qué se te antoja hoy en Píritu?');
   activeImageIndex = signal<number>(0);
-  
+  // Imágenes del carrusel (pueden ser estáticas o dinámicas)
  images = signal<string[]>(LOBBY_IMAGES);
 
   // Signals de Datos Reales
