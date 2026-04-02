@@ -20,14 +20,22 @@ Hemos implementado una Arquitectura Basada en Características (Feature-Based Ar
 Estructura de Carpetas
 
 src/app/
+
 ├── core/              # Singleton Services (Auth, Interceptors, Guards)
+
 ├── data/              # Interfaces, Models y Mocks de datos
+
 ├── features/          # Módulos de usuario (Lobby, Auth, Store, Dashboard)
+
 │   ├── auth/          # Login y Registro (Cliente/Negocio)
+
 │   ├── lobby/         # Landing page y búsqueda inicial
+
 │   └── ...            
 ├── shared/            # Componentes reutilizables, Pipes y Assets comunes
+
 │   ├── assets/        # Configuración centralizada de imágenes/iconos
+
 │   └── components/    # Botones, Cards y Modales genéricos
 
 Flujo de Datos
@@ -47,7 +55,7 @@ Angular CLI: npm install -g @angular/cli.
 git clone https://github.com/tu-usuario/piritufood.git
 
 # Entrar a la carpeta
-cd piritufood
+cd piritu-food
 
 # Instalar dependencias
 npm install
