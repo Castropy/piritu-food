@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { ProductService } from '../../core/services/products/product.service'; // <--- Servicio especializado
 import { Product } from '../../data/interfaces';
 import { Subject, takeUntil } from 'rxjs';
+import { LOBBY_IMAGES } from '../../shared/assets/lobby-images.assets';
 
 interface Hook {
   text: string;
@@ -28,11 +29,7 @@ export class LobbyComponent implements OnInit, OnDestroy {
   currentHook = signal<string>('¿Qué se te antoja hoy en Píritu?');
   activeImageIndex = signal<number>(0);
   
-  images = signal<string[]>([
-    'bat_fresa.webp', 'cachapa.webp', 'empanadas.webp', 'grill.webp', 
-    'hamburguesa.webp', 'hand_burguer.webp', 'hot_dogs.webp', 'pabellon.webp', 
-    'papitas.webp', 'parrilla.webp', 'pasticho.webp', 'pizza.webp', 'pollo_asado.webp'
-  ]);
+ images = signal<string[]>(LOBBY_IMAGES);
 
   // Signals de Datos Reales
   featuredProducts = signal<Product[]>([]); 
