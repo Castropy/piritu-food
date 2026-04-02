@@ -1,8 +1,9 @@
 import { Component, OnInit, signal, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { BaseFirestoreService } from '../../core/services/firestore/base-firestore.service'; // Ajusta la ruta si es necesario
-import { Product } from '../../data/interfaces'; // Importamos tu interfaz blindada
+import { ProductService } from '../../core/services/products/product.service'; // <--- Servicio especializado
+import { Product } from '../../data/interfaces';
+import { Subject, takeUntil } from 'rxjs';
 
 interface Hook {
   text: string;
@@ -16,9 +17,14 @@ interface Hook {
   templateUrl: './lobby.component.html',
 })
 export class LobbyComponent implements OnInit, OnDestroy {
+  // Inyecciones
   private router = inject(Router);
-  private firestoreService = inject(BaseFirestoreService); // <--- Inyectamos el motor
+  private productService = inject(ProductService); // <--- Usamos el servicio que ya tiene el mapper
 
+  // Control de memoria
+  private destroy$ = new Subject<void>();
+
+  // Signals de UI
   currentHook = signal<string>('¿Qué se te antoja hoy en Píritu?');
   activeImageIndex = signal<number>(0);
   
@@ -28,12 +34,11 @@ export class LobbyComponent implements OnInit, OnDestroy {
     'papitas.webp', 'parrilla.webp', 'pasticho.webp', 'pizza.webp', 'pollo_asado.webp'
   ]);
 
+  // Signals de Datos Reales
+  featuredProducts = signal<Product[]>([]); 
+
   private hookInterval: any;
   private imageInterval: any;
-
-  // Tipamos el Signal con tu interfaz Product para tener autocompletado y seguridad
-  featuredProducts = signal<Product[]>([]); 
-  activeBusinesses = signal<any[]>([]);
 
   private hooks: Hook[] = [
     { text: '¿Hoy es domingo? Pide tu desayuno y sigue descansando.', type: 'client' },
@@ -46,47 +51,60 @@ export class LobbyComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.initDynamicContent();
-    this.loadPreviewData();
+    this.loadFeaturedProducts();
   }
 
   ngOnDestroy() {
+    // Limpieza de intervalos
     if (this.hookInterval) clearInterval(this.hookInterval);
     if (this.imageInterval) clearInterval(this.imageInterval);
+    
+    // Limpieza de suscripciones
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   private initDynamicContent() {
     const hour = new Date().getHours();
     const day = new Date().getDay(); 
 
+    // Lógica de bienvenida temporal
     if (day === 0 && hour < 12) {
       this.currentHook.set('¡Feliz domingo! Pide tus empanadas y quédate en cama.');
     } else if (hour >= 18) {
       this.currentHook.set('¿Cena lista? Revisa las promociones de hoy.');
     }
 
+    // Rotación de hooks
     this.hookInterval = setInterval(() => {
       const randomIndex = Math.floor(Math.random() * this.hooks.length);
       this.currentHook.set(this.hooks[randomIndex].text);
     }, 8000);
 
+    // Carrusel de imágenes
     this.imageInterval = setInterval(() => {
       this.activeImageIndex.update(index => (index + 1) % this.images().length);
     }, 5000);
   }
 
   /**
-   * Carga de datos reales desde Firestore
+   * Carga de productos destacados usando el servicio especializado.
    */
-  loadPreviewData() {
-    // Escuchamos solo los productos habilitados (is_enabled: true)
-    this.firestoreService.getFiltered<Product>('products', 'is_enabled', true)
+  private loadFeaturedProducts() {
+    // En el Lobby no sabemos el business_id, así que podríamos 
+    // necesitar un método en el servicio que traiga productos globales 
+    // o simplemente los más recientes de cualquier negocio.
+    
+    // Por ahora, usamos el getWhere del padre a través del ProductService
+    // filtrando por los que están habilitados.
+    this.productService.getAvailableProductsByBusiness('') // Si pasas vacío o creas un getGlobal
+      .pipe(takeUntil(this.destroy$)) 
       .subscribe({
-        next: (data) => {
-          // Tomamos los primeros 4 para mantener la estética del Lobby
-          this.featuredProducts.set(data.slice(0, 4));
-          console.log('Data real cargada en Lobby:', data);
+        next: (products) => {
+          // Tomamos 4 aleatorios o los primeros 4 para el preview
+          this.featuredProducts.set(products.sort(() => 0.5 - Math.random()).slice(0, 4));
         },
-        error: (err) => console.error('Error cargando productos:', err)
+        error: (err) => console.error('Error al cargar destacados:', err)
       });
   }
 
@@ -96,6 +114,7 @@ export class LobbyComponent implements OnInit, OnDestroy {
 
   search(term: string) {
     if (!term) return;
-    console.log('Buscando:', term);
+    // Aquí podrías navegar a una página de resultados
+    this.router.navigate(['/search'], { queryParams: { q: term } });
   }
 }
