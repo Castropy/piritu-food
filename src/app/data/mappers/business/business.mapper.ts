@@ -3,22 +3,17 @@ import { Business } from '../../interfaces';
 
 /**
  * BusinessMapper: Transforma la data entre Firestore y la entidad Business.
- * 
- * Por qué: Los negocios tienen campos complejos (arrays de fotos, horarios en string).
- * Este mapper asegura que la UI siempre reciba estructuras válidas y limpias.
  */
 export class BusinessMapper {
 
   /**
    * Mapea el documento de Firestore a la interfaz Business del sistema.
-   * @param id UID del documento del negocio.
-   * @param data Datos crudos de la colección 'businesses'.
    */
   static fromFirestore(id: string, data: Omit<Business, 'id'>): Business {
     return {
       id,
       address: data.address || '',
-      closing_time: data.closing_time || '22:00', // Valor por defecto sensato
+      closing_time: data.closing_time || '22:00',
       description: data.description || '',
       email: data.email || '',
       gallery_urls: data.gallery_urls || [],
@@ -31,6 +26,13 @@ export class BusinessMapper {
       penalty_status: data.penalty_status || 0,
       phone: data.phone || '',
       tax_id: data.tax_id || '',
+      
+      // Mapeo del objeto denormalizado MVP
+      mvp_product: data.mvp_product ? {
+        ...data.mvp_product,
+        selection_date: this.mapDate(data.mvp_product.selection_date)
+      } : null,
+
       created_at: this.mapDate(data.created_at),
       updated_at: data.updated_at ? this.mapDate(data.updated_at) : undefined
     };
@@ -55,14 +57,20 @@ export class BusinessMapper {
       penalty_status: business.penalty_status,
       phone: business.phone,
       tax_id: business.tax_id,
+      
+      // Persistencia del MVP (se asegura de enviar Date nativo)
+      mvp_product: business.mvp_product ? {
+        ...business.mvp_product,
+        selection_date: business.mvp_product.selection_date || new Date()
+      } : null,
+
       created_at: business.created_at || new Date(),
       updated_at: new Date()
     };
   }
 
   /**
-   * Normalización de fechas sin 'any'.
-   * Maneja la transición de Timestamps de Firebase a Date nativo.
+   * Normalización de fechas.
    */
   private static mapDate(date: Timestamp | Date | undefined): Date {
     if (date instanceof Timestamp) {
