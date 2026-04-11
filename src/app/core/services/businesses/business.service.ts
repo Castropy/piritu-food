@@ -7,8 +7,7 @@ import { orderBy, where } from '@angular/fire/firestore';
 
 /**
  * BusinessService: Gestiona todas las operaciones relacionadas con los negocios.
- * 
- * Este servicio centraliza la lógica para la visualización de clientes, 
+ * * Este servicio centraliza la lógica para la visualización de clientes, 
  * el panel de administración y la gestión de estados de verificación. 
  * Hereda la funcionalidad CRUD genérica del servicio base de Firestore.
  */
@@ -63,6 +62,18 @@ export class BusinessService extends BaseFirestoreService<Business> {
     return this.update(id, { 
       ...data, 
       updated_at: new Date() // El mapper se encargará de la conversión final
+    });
+  }
+
+  /**
+   * Actualiza el producto destacado (MVP) del negocio.
+   * Este método persiste la información denormalizada del producto seleccionado
+   * para optimizar las consultas en el perfil público del establecimiento.
+   */
+  public async setMvpProduct(businessId: string, mvpData: Business['mvp_product']): Promise<void> {
+    return this.update(businessId, {
+      mvp_product: mvpData,
+      updated_at: new Date()
     });
   }
 
