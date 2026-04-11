@@ -1,4 +1,4 @@
-import { inject } from '@angular/core';
+import { inject, isDevMode } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { map, take } from 'rxjs';
 import { AuthService } from '../services/auth/auth.service';
@@ -10,6 +10,15 @@ import { AuthService } from '../services/auth/auth.service';
 export const authGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
+
+  /**
+   * El sistema verifica si la aplicación se encuentra en modo desarrollo.
+   * Si es así, permite el acceso total para facilitar las pruebas de UI.
+   */
+  if (isDevMode()) {
+    console.log('🔓 [AuthGuard] Bypass activado: Modo Desarrollo');
+    return true;
+  }
 
   // Consultamos el estado del usuario en nuestro servicio
   return authService.user$.pipe(
