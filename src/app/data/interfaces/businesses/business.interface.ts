@@ -15,7 +15,18 @@ export interface Business {
   owner_name: string;       
   penalty_status: number;   
   phone: string;
-  tax_id: string;           
+  tax_id: string;      
+  /**
+   * MVP: Producto destacado de la semana.
+   * Denormalizado para evitar lecturas extra.
+   */
+  mvp_product?: {
+    id: string;
+    name: string;
+    price: number;
+    image_url: string;
+    selection_date: Timestamp | Date;
+  } | null;     
   created_at?: Timestamp | Date;
   updated_at?: Timestamp | Date;
 }
