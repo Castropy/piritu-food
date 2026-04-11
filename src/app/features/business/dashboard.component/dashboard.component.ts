@@ -11,7 +11,7 @@ import { map } from 'rxjs';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.scss'
+  //styleUrl: './dashboard.component.scss'
 })
 export class DashboardComponent implements OnInit {
   // Inyección de servicios
