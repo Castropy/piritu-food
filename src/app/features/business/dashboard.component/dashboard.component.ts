@@ -42,14 +42,21 @@ export class DashboardComponent implements OnInit {
    * Determina si el producto MVP debe ser actualizado 
    * (Lógica inicial para el recordatorio de marketing).
    */
+  /**
+   * Determina si el producto MVP debe ser actualizado.
+   * El sistema normaliza la fecha de selección para compararla con la fecha actual.
+   */
   public needsMvpUpdate = computed(() => {
     const mvp = this.business()?.mvp_product;
     if (!mvp) return true;
     
-    // El sistema evalúa si la selección es de una semana distinta a la actual
-    const lastSelection = new Date(mvp.selection_date);
+    // Normalización manual para resolver el error de tipos en el constructor de Date
+    const selectionDate = mvp.selection_date instanceof Date 
+      ? mvp.selection_date 
+      : (mvp.selection_date as any).toDate(); // Convierte Timestamp a Date nativo
+
     const today = new Date();
-    const diffTime = Math.abs(today.getTime() - lastSelection.getTime());
+    const diffTime = Math.abs(today.getTime() - selectionDate.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
     return diffDays > 7;
