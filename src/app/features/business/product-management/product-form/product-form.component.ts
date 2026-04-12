@@ -6,11 +6,12 @@ import { BusinessService } from '../../../../core/services/businesses/business.s
 import { GLOBAL_CATEGORIES } from '../../../../core/constants/category.constants';
 import { Product } from '../../../../data/interfaces';
 
-// ✅ PrimeNG v21: Importaciones directas de componentes (sin el sufijo Module)
+// PrimeNG v21 Standalone Components
 import { InputText } from 'primeng/inputtext';
 import { InputNumber } from 'primeng/inputnumber';
-import { Select } from 'primeng/select'; // Dropdown evolucionó a Select
+import { Select } from 'primeng/select'; 
 import { Chip } from 'primeng/chip';
+import { Button } from 'primeng/button';
 import { DynamicDialogRef } from 'primeng/dynamicdialog';
 
 @Component({
@@ -23,7 +24,7 @@ import { DynamicDialogRef } from 'primeng/dynamicdialog';
     InputNumber, 
     Select, 
     Chip, 
-    
+    Button
   ],
   templateUrl: './product-form.component.html'
 })
@@ -40,7 +41,7 @@ export class ProductFormComponent implements OnInit {
     name: ['', [Validators.required, Validators.minLength(3)]],
     price: [0, [Validators.required, Validators.min(0.1)]],
     category_selection: ['', [Validators.required]], 
-    custom_category_name: [''],
+    custom_category_name: [''], 
     ingredients: [[] as string[]],
     extras: [[] as string[]],
     image_url: [null as string | null]
@@ -81,7 +82,7 @@ export class ProductFormComponent implements OnInit {
       ingredients: raw.ingredients,
       extras: raw.extras,
       image_url: raw.image_url,
-      is_enabled: true
+      is_enabled: true 
     };
 
     try {

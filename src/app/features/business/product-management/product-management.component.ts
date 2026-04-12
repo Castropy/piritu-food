@@ -7,41 +7,60 @@ import { BusinessService } from '../../../core/services/businesses/business.serv
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Product } from '../../../data/interfaces';
 
-
-// Importaciones de PrimeNG
+// PrimeNG v21 Components
 import { TableModule } from 'primeng/table';
-import { ToggleSwitchModule } from 'primeng/toggleswitch';
-import { ButtonModule } from 'primeng/button';
-import { TagModule } from 'primeng/tag';
+import { ToggleSwitch } from 'primeng/toggleswitch';
+import { Button } from 'primeng/button';
+import { Tag } from 'primeng/tag';
+
+// Dialog Service
+import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { ProductFormComponent } from './product-form/product-form.component';
 
 @Component({
   selector: 'app-product-management',
   standalone: true,
-  // El sistema integra los módulos de PrimeNG para la gestión UI
+  providers: [DialogService],
   imports: [
     CommonModule, 
     RouterLink, 
     FormsModule,
     TableModule, 
-    ToggleSwitchModule, 
-    ButtonModule, 
-    TagModule
+    ToggleSwitch, 
+    Button, 
+    Tag
   ],
   templateUrl: './product-management.component.html'
 })
 export class ProductManagementComponent {
   private readonly productService = inject(ProductService);
   private readonly businessService = inject(BusinessService);
+  private readonly dialogService = inject(DialogService);
   
+  // Corregido: Soporta null para evitar error 2322
+  private ref: DynamicDialogRef | undefined | null;
+
   public products = toSignal(
     this.productService.getProductsByBusiness(this.businessService.selectedBusiness()?.id || ''),
     { initialValue: [] as Product[] }
   );
 
-  /**
-   * El sistema actualiza la disponibilidad del producto en tiempo real.
-   * Permite al dueño ocultar/mostrar productos del menú del cliente.
-   */
+  public showProductForm(): void {
+    this.ref = this.dialogService.open(ProductFormComponent, {
+      header: 'Nuevo Producto - PírituFood',
+      width: '50vw',
+      breakpoints: { '960px': '75vw', '640px': '90vw' },
+      closable: true
+    });
+
+    // Corregido: Optional chaining para evitar error 2532
+    this.ref?.onClose.subscribe((added: boolean) => {
+      if (added) {
+        console.log('Producto agregado');
+      }
+    });
+  }
+
   public async toggleAvailability(product: Product): Promise<void> {
     try {
       await this.productService.updateProduct(product.id!, { 
