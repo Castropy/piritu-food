@@ -46,7 +46,7 @@ export class ProductManagementComponent {
   public async toggleAvailability(product: Product): Promise<void> {
     try {
       await this.productService.updateProduct(product.id!, { 
-        is_available: !product.is_available 
+        is_enabled: !product.is_enabled,
       });
     } catch (error) {
       console.error('Error al cambiar disponibilidad:', error);

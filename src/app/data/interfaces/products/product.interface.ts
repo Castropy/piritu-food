@@ -13,5 +13,4 @@ export interface Product {
   price: number;
   created_at?: Timestamp | Date;
   updated_at?: Timestamp | Date;
-  is_available: boolean;
 }

@@ -28,7 +28,7 @@ export class ProductMapper {
       price: Number(data.price) || 0,
       created_at: this.mapDate(data.created_at),
       updated_at: data.updated_at ? this.mapDate(data.updated_at) : undefined,
-      is_available: data.is_available ?? true,
+      
     };
   }
 
@@ -45,7 +45,6 @@ export class ProductMapper {
       is_enabled: product.is_enabled,
       name: product.name,
       price: product.price,
-      is_available: product.is_available ?? true,
       created_at: product.created_at || new Date(),
       updated_at: new Date()
     };
