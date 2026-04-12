@@ -2,34 +2,70 @@
   
   <div class="flex flex-col gap-2">
     <label class="font-bold text-gray-700">Nombre del Producto</label>
-    <input pInputText formControlName="name" placeholder="Ej: Pizza Familiar" class="rounded-xl" />
+    <input 
+      pInputText 
+      formControlName="name" 
+      placeholder="Ej: Pizza Familiar" 
+      class="rounded-xl w-full" />
+    <small class="text-red-500" *ngIf="productForm.get('name')?.invalid && productForm.get('name')?.touched">
+      El nombre debe tener al menos 3 caracteres.
+    </small>
   </div>
 
-  <div class="grid grid-cols-2 gap-4">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
     <div class="flex flex-col gap-2">
       <label class="font-bold text-gray-700">Precio ($)</label>
-      <p-inputnumber formControlName="price" mode="currency" currency="USD" locale="en-US" [min]="0"></p-inputnumber>
+      <p-inputnumber 
+        formControlName="price" 
+        mode="currency" 
+        currency="USD" 
+        locale="en-US" 
+        [min]="0"
+        styleClass="w-full"
+        inputStyleClass="rounded-xl w-full">
+      </p-inputnumber>
     </div>
 
     <div class="flex flex-col gap-2">
       <label class="font-bold text-gray-700">Categoría</label>
-      <p-select [options]="categories" formControlName="category_selection" 
-                optionLabel="name" optionValue="id" 
-                placeholder="Selecciona una" class="w-full"></p-select>
+      <p-select 
+        [options]="categories" 
+        formControlName="category_selection" 
+        optionLabel="name" 
+        optionValue="id" 
+        placeholder="Selecciona una" 
+        styleClass="w-full rounded-xl">
+      </p-select>
     </div>
   </div>
 
   <div *ngIf="isCustomCategory" class="flex flex-col gap-2 animate-fade-in">
     <label class="font-bold text-orange-600">Nombre de tu Categoría</label>
-    <input pInputText formControlName="custom_category_name" placeholder="Ej: Especialidades Árabes" class="border-orange-300" />
+    <input 
+      pInputText 
+      formControlName="custom_category_name" 
+      placeholder="Ej: Especialidades Árabes" 
+      class="border-orange-300 rounded-xl w-full" />
   </div>
 
   <div class="flex flex-col gap-2">
-    <label class="font-bold text-gray-700">Ingredientes</label>
-    <p-chip formControlName="ingredients" placeholder="Escribe y presiona Enter"></p-chip>
+    <label class="font-bold text-gray-700">Ingredientes / Descripción breve</label>
+    <p-chips 
+      formControlName="ingredients" 
+      placeholder="Escribe un ingrediente y presiona Enter"
+      styleClass="w-full"
+      inputStyleClass="rounded-xl w-full">
+    </p-chips>
   </div>
 
-  <button p-button type="submit" label="Crear Producto" 
-          [disabled]="productForm.invalid" 
-          class="p-button-orange w-full mt-4 py-3 rounded-2xl font-bold shadow-lg"></button>
+  <div class="pt-4">
+    <p-button 
+      type="submit" 
+      label="Crear Producto" 
+      icon="pi pi-check"
+      [disabled]="productForm.invalid" 
+      styleClass="p-button-orange w-full py-3 rounded-2xl font-bold shadow-lg transition-all">
+    </p-button>
+  </div>
+
 </form>
