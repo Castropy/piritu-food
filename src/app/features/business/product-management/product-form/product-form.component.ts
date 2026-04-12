@@ -11,7 +11,6 @@ import { InputText } from 'primeng/inputtext';
 import { InputNumber } from 'primeng/inputnumber';
 import { Select } from 'primeng/select'; // Dropdown evolucionó a Select
 import { Chip } from 'primeng/chip';
-import { Button } from 'primeng/button';
 import { DynamicDialogRef } from 'primeng/dynamicdialog';
 
 @Component({
@@ -24,7 +23,7 @@ import { DynamicDialogRef } from 'primeng/dynamicdialog';
     InputNumber, 
     Select, 
     Chip, 
-    Button
+    
   ],
   templateUrl: './product-form.component.html'
 })

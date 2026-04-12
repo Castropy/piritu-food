@@ -34,6 +34,9 @@ export const routes: Routes = [
       {
         path: 'products',
         loadComponent: () => import('./features/business/product-management/product-management.component').then(m => m.ProductManagementComponent),
+      },
+      {path: 'product-form',
+        loadComponent: () => import('./features/business/product-management/product-form/product-form.component').then(m => m.ProductFormComponent),
       }
     ]
   },
