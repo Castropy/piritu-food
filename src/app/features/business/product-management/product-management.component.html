@@ -4,7 +4,8 @@
       <h2 class="text-2xl font-black text-gray-800 tracking-tight">MI MENÚ</h2>
       <p class="text-gray-500 text-sm">Gestiona la disponibilidad y precios de tus productos</p>
     </div>
-    <button [routerLink]="['new']" 
+    
+    <button (click)="showProductForm()" 
             class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 rounded-2xl font-bold transition-all shadow-lg flex items-center gap-2">
       <i class="pi pi-plus"></i>
       Nuevo Producto
@@ -47,15 +48,16 @@
             <span class="font-black text-orange-600">{{ product.price | currency:'USD' }}</span>
           </td>
           <td class="p-4 text-center">
-            <p-toggleSwitch [(ngModel)]="product.is_available" 
-                (onChange)="toggleAvailability(product)">
-</p-toggleSwitch>
+            <p-toggleswitch [(ngModel)]="product.is_enabled" 
+                            (onChange)="toggleAvailability(product)">
+            </p-toggleswitch>
           </td>
           <td class="p-4 text-center">
-            <button pButton icon="pi pi-pencil" 
-                    [routerLink]="[product.id]" 
-                    class="p-button-rounded p-button-text p-button-warning">
-            </button>
+            <p-button icon="pi pi-pencil" 
+                      [rounded]="true" 
+                      [text]="true" 
+                      severity="warning">
+            </p-button>
           </td>
         </tr>
       </ng-template>
