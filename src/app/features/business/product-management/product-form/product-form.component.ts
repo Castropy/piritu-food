@@ -10,7 +10,7 @@ import { Product } from '../../../../data/interfaces';
 import { InputText } from 'primeng/inputtext';
 import { InputNumber } from 'primeng/inputnumber';
 import { Select } from 'primeng/select'; // Dropdown evolucionó a Select
-import { Chips } from 'primeng/chips';
+import { Chip } from 'primeng/chip';
 import { Button } from 'primeng/button';
 import { DynamicDialogRef } from 'primeng/dynamicdialog';
 
@@ -23,7 +23,7 @@ import { DynamicDialogRef } from 'primeng/dynamicdialog';
     InputText, 
     InputNumber, 
     Select, 
-    Chips, 
+    Chip, 
     Button
   ],
   templateUrl: './product-form.component.html'
