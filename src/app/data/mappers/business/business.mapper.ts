@@ -26,6 +26,7 @@ export class BusinessMapper {
       penalty_status: data.penalty_status || 0,
       phone: data.phone || '',
       tax_id: data.tax_id || '',
+      force_close: !!data.force_close,
       
       // Mapeo del objeto denormalizado MVP
       mvp_product: data.mvp_product ? {
@@ -57,6 +58,7 @@ export class BusinessMapper {
       penalty_status: business.penalty_status,
       phone: business.phone,
       tax_id: business.tax_id,
+      force_close: business.force_close ?? false,
       
       // Persistencia del MVP (se asegura de enviar Date nativo)
       mvp_product: business.mvp_product ? {

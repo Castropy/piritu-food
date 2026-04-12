@@ -15,7 +15,8 @@ export interface Business {
   owner_name: string;       
   penalty_status: number;   
   phone: string;
-  tax_id: string;      
+  tax_id: string;   
+  force_close: boolean;   
   /**
    * MVP: Producto destacado de la semana.
    * Denormalizado para evitar lecturas extra.
