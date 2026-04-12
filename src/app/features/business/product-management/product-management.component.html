@@ -47,9 +47,9 @@
             <span class="font-black text-orange-600">{{ product.price | currency:'USD' }}</span>
           </td>
           <td class="p-4 text-center">
-            <p-inputSwitch [(ngModel)]="product.is_available" 
-                          (onChange)="toggleAvailability(product)">
-            </p-inputSwitch>
+            <p-toggleSwitch [(ngModel)]="product.is_available" 
+                (onChange)="toggleAvailability(product)">
+</p-toggleSwitch>
           </td>
           <td class="p-4 text-center">
             <button pButton icon="pi pi-pencil" 
