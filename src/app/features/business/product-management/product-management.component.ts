@@ -21,6 +21,8 @@ import { TagModule } from 'primeng/tag';
   imports: [
     CommonModule, 
     RouterLink, 
+    RouterLinkActive,
+    FormsModule,
     TableModule, 
     ToggleSwitchModule, 
     ButtonModule, 

@@ -1,5 +1,6 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 import { BusinessService } from '../../../core/services/businesses/business.service';
 import { OrderService } from '../../../core/services/orders/order.service';
 import { Business, Order } from '../../../data/interfaces';
@@ -10,7 +11,7 @@ import { BusinessLogicUtils } from '../../../core/utils/businesses/business-logi
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink, RouterLinkActive],
   templateUrl: './dashboard.component.html',
   //styleUrl: './dashboard.component.scss'
 })
