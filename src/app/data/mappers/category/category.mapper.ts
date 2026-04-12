@@ -3,8 +3,7 @@ import { Category } from '../../interfaces';
 
 /**
  * CategoryMapper: Responsable de la transformación de datos para las categorías de productos.
- * 
- * Este mapper asegura que la jerarquía y el orden visual de la tienda se mantengan
+ * * Este mapper asegura que la jerarquía y el orden visual de la tienda se mantengan
  * consistentes, normalizando los tipos de datos de Firestore al modelo de la aplicación.
  */
 export class CategoryMapper {
@@ -19,10 +18,14 @@ export class CategoryMapper {
       id,
       business_id: data.business_id || '',
       description: data.description || '',
+      // Agregamos el soporte para el icono (desde constantes o personalizado)
+      icon: data.icon || 'pi-tag',
       display_order: typeof data.display_order === 'number' ? data.display_order : 0,
       is_enabled: !!data.is_enabled,
       name: data.name || 'Categoría sin nombre',
       product_count: data.product_count || 0,
+      // VITAL: Identificar si es una categoría de nuestra lista global o creada por el negocio
+      is_custom: !!data.is_custom, 
       created_at: this.mapDate(data.created_at),
       updated_at: data.updated_at ? this.mapDate(data.updated_at) : undefined
     };
@@ -35,10 +38,14 @@ export class CategoryMapper {
     return {
       business_id: category.business_id,
       description: category.description,
+      // Persistimos el icono seleccionado
+      icon: category.icon || 'pi-tag',
       display_order: category.display_order,
       is_enabled: category.is_enabled,
       name: category.name,
       product_count: category.product_count,
+      // Guardamos la marca de personalización
+      is_custom: category.is_custom, 
       created_at: category.created_at || new Date(),
       updated_at: new Date()
     };
