@@ -5,6 +5,7 @@ import { OrderService } from '../../../core/services/orders/order.service';
 import { Business, Order } from '../../../data/interfaces';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
+import { BusinessLogicUtils } from '../../../core/utils/businesses/business-logic.utils';
 
 @Component({
   selector: 'app-dashboard',
@@ -82,4 +83,12 @@ export class DashboardComponent implements OnInit {
       console.error('Error al actualizar el estado del pedido:', error);
     }
   }
+
+  public businessStatus = computed(() => 
+  BusinessLogicUtils.getBusinessStatus(this.business())
+);
+
+public isActuallyOpen = computed(() => 
+  this.businessStatus() === 'open'
+);
 }
