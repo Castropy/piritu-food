@@ -20,6 +20,23 @@
     }
   </header>
 
+  <nav class="flex gap-8 border-b border-gray-200 mb-6">
+  <a routerLink="/dashboard" 
+     routerLinkActive="border-orange-500 text-orange-600" 
+     [routerLinkActiveOptions]="{exact: true}"
+     class="pb-3 border-b-2 border-transparent font-semibold text-sm transition-all flex items-center gap-2">
+    <i class="pi pi-shopping-cart"></i>
+    Gestión de Pedidos
+  </a>
+
+  <a routerLink="/dashboard/products" 
+     routerLinkActive="border-orange-500 text-orange-600"
+     class="pb-3 border-b-2 border-transparent font-semibold text-sm transition-all flex items-center gap-2 text-gray-500 hover:text-gray-700">
+    <i class="pi pi-box"></i>
+    Catálogo de Productos
+  </a>
+</nav>
+
   <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
     <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
       <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Pedidos Pendientes</h3>
