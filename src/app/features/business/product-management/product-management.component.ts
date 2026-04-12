@@ -1,10 +1,12 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { ProductService } from '../../../core/services/products/product.service';
 import { BusinessService } from '../../../core/services/businesses/business.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Product } from '../../../data/interfaces';
+
 
 // Importaciones de PrimeNG
 import { TableModule } from 'primeng/table';
