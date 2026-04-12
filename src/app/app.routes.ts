@@ -25,8 +25,17 @@ export const routes: Routes = [
   // DASHBOARD: Para los dueños de negocios
   {
     path: 'dashboard',
-    loadComponent: () => import('./features/business/dashboard.component/dashboard.component').then(m => m.DashboardComponent),
-    canActivate: [authGuard]
+    canActivate: [authGuard],
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./features/business/dashboard.component/dashboard.component').then(m => m.DashboardComponent),
+      },
+      {
+        path: 'products',
+        loadComponent: () => import('./features/business/product-management/product-management.component').then(m => m.ProductManagementComponent),
+      }
+    ]
   },
 
   // ADMIN: Para el control total de PírituFood
