@@ -84,4 +84,9 @@ export class BusinessService extends BaseFirestoreService<Business> {
   public selectBusiness(business: Business | null): void {
     this.selectedBusinessSignal.set(business);
   }
+
+  // Método adicional para togglear el estado de cierre forzado del negocio, útil para pruebas y administración rápida.
+public async toggleForceClose(businessId: string, status: boolean): Promise<void> {
+  return this.update(businessId, { force_close: status });
+}
 }
