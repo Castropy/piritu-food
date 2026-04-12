@@ -5,6 +5,7 @@ import {
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
 // Firebase core
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
@@ -22,6 +23,8 @@ export const appConfig: ApplicationConfig = {
     
     provideRouter(routes),
     provideClientHydration(withEventReplay()),
+
+    provideAnimationsAsync(), 
 
     // --- Configuración de Firebase ---
     provideFirebaseApp(() => initializeApp(environment.firebase)),
