@@ -8,7 +8,7 @@ import { Product } from '../../../data/interfaces';
 
 // Importaciones de PrimeNG
 import { TableModule } from 'primeng/table';
-import { InputSwitchModule } from 'primeng/inputswitch';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 
@@ -20,7 +20,7 @@ import { TagModule } from 'primeng/tag';
     CommonModule, 
     RouterLink, 
     TableModule, 
-    InputSwitchModule, 
+    ToggleSwitchModule, 
     ButtonModule, 
     TagModule
   ],
