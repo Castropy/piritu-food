@@ -6,12 +6,12 @@ import { BusinessService } from '../../../../core/services/businesses/business.s
 import { GLOBAL_CATEGORIES } from '../../../../core/constants/category.constants';
 import { Product } from '../../../../data/interfaces';
 
-// PrimeNG para un look pro
-import { InputTextModule } from 'primeng/inputtext';
-import { InputNumberModule } from 'primeng/inputnumber';
-import { DropdownModule } from 'primeng/dropdown';
-import { ChipsModule } from 'primeng/chips';
-import { ButtonModule } from 'primeng/button';
+// ✅ PrimeNG v21: Importaciones directas de componentes (sin el sufijo Module)
+import { InputText } from 'primeng/inputtext';
+import { InputNumber } from 'primeng/inputnumber';
+import { Select } from 'primeng/select'; // Dropdown evolucionó a Select
+import { Chips } from 'primeng/chips';
+import { Button } from 'primeng/button';
 import { DynamicDialogRef } from 'primeng/dynamicdialog';
 
 @Component({
@@ -20,11 +20,11 @@ import { DynamicDialogRef } from 'primeng/dynamicdialog';
   imports: [
     CommonModule, 
     ReactiveFormsModule, 
-    InputTextModule, 
-    InputNumberModule, 
-    DropdownModule, 
-    ChipsModule, 
-    ButtonModule
+    InputText, 
+    InputNumber, 
+    Select, 
+    Chips, 
+    Button
   ],
   templateUrl: './product-form.component.html'
 })
@@ -34,22 +34,20 @@ export class ProductFormComponent implements OnInit {
   private businessService = inject(BusinessService);
   private ref = inject(DynamicDialogRef);
 
-  // Cargamos nuestras constantes globales
   public categories = GLOBAL_CATEGORIES;
   public isCustomCategory = false;
 
   public productForm = this.fb.group({
     name: ['', [Validators.required, Validators.minLength(3)]],
     price: [0, [Validators.required, Validators.min(0.1)]],
-    category_selection: ['', [Validators.required]], // Para el dropdown
-    custom_category_name: [''], // Solo se usa si eligen "Personalizada"
+    category_selection: ['', [Validators.required]], 
+    custom_category_name: [''],
     ingredients: [[] as string[]],
     extras: [[] as string[]],
     image_url: [null as string | null]
   });
 
   ngOnInit() {
-    // Escuchamos cambios en el selector de categorías
     this.productForm.get('category_selection')?.valueChanges.subscribe(value => {
       this.isCustomCategory = value === 'personalizada';
       const customCtrl = this.productForm.get('custom_category_name');
@@ -71,14 +69,12 @@ export class ProductFormComponent implements OnInit {
     if (!businessId) return;
 
     const raw = this.productForm.getRawValue();
-    
-    // Lógica para definir el category_id final
     const finalCategoryId = this.isCustomCategory 
       ? raw.custom_category_name 
       : raw.category_selection;
 
     const newProduct: Product = {
-      id: '', // Firestore lo genera
+      id: '', 
       business_id: businessId,
       category_id: finalCategoryId,
       name: raw.name,
@@ -86,7 +82,7 @@ export class ProductFormComponent implements OnInit {
       ingredients: raw.ingredients,
       extras: raw.extras,
       image_url: raw.image_url,
-      is_enabled: true // Se crea habilitado por defecto
+      is_enabled: true
     };
 
     try {
