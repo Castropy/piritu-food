@@ -15,10 +15,6 @@ import { getStorage, provideStorage } from '@angular/fire/storage';
 import { routes } from './app.routes';
 import { environment } from '../environments/environment';
 
-// ✅ Importación oficial de PrimeNG v21
-import { DialogService } from 'primeng/dynamicdialog';
-
-
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZonelessChangeDetection(), 
@@ -28,9 +24,6 @@ export const appConfig: ApplicationConfig = {
 
     provideAnimationsAsync(),
     
-    // ✅ Provider global para evitar errores NG0201 en componentes hijos
-    DialogService,
-
     // --- Configuración de Firebase ---
     provideFirebaseApp(() => initializeApp(environment.firebase)),
     provideAuth(() => getAuth()),
