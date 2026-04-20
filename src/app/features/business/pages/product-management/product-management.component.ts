@@ -12,13 +12,14 @@ import { ToggleSwitch } from 'primeng/toggleswitch';
 import { Button } from 'primeng/button';
 import { Tag } from 'primeng/tag';
 
-// Dialog Service
+// ✅ Importación limpia de DynamicDialog
 import { DialogService, DynamicDialogModule, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { ProductFormComponent } from '../../components/product-form/product-form.component';
 
 @Component({
   selector: 'app-product-management',
   standalone: true,
+  // 💡 Ya no necesitamos 'providers: [DialogService]' aquí porque es global en app.config.ts
   imports: [
     CommonModule,  
     FormsModule,
@@ -35,12 +36,10 @@ export class ProductManagementComponent implements OnDestroy {
   private readonly businessService = inject(BusinessService);
   private readonly dialogService = inject(DialogService);
   
-  // Corregido: Soporta null para evitar error 2322
   private ref: DynamicDialogRef | undefined | null;
 
   /**
-   * Obtiene la lista de productos reactivamente. 
-   * Gracias a la nueva estructura de rutas, este signal se mantiene vivo mientras estemos en /products.
+   * Obtiene la lista de productos reactivamente vinculada al negocio seleccionado.
    */
   public products = toSignal(
     this.productService.getProductsByBusiness(this.businessService.selectedBusiness()?.id || ''),
@@ -49,7 +48,6 @@ export class ProductManagementComponent implements OnDestroy {
 
   /**
    * Despliega el formulario de producto en un diálogo dinámico.
-   * El sistema ahora renderiza este diálogo sobre el layout persistente del Dashboard.
    */
   public showProductForm(): void {
     this.ref = this.dialogService.open(ProductFormComponent, {
@@ -57,11 +55,12 @@ export class ProductManagementComponent implements OnDestroy {
       width: '50vw',
       breakpoints: { '960px': '75vw', '640px': '90vw' },
       closable: true,
-      modal: true, // El sistema asegura que el diálogo sea modal para mejorar la UX
-      styleClass: 'custom-product-dialog'
+      modal: true,
+      styleClass: 'custom-product-dialog',
+      // 💡 Importante: Esto asegura que el DialogService sepa dónde inyectar el componente
+      appendTo: 'body' 
     });
 
-    // Corregido: Optional chaining para evitar error 2532
     this.ref?.onClose.subscribe((added: boolean) => {
       if (added) {
         console.log('El sistema detectó un nuevo producto agregado');
@@ -70,13 +69,12 @@ export class ProductManagementComponent implements OnDestroy {
   }
 
   /**
-   * Alterna la disponibilidad de un producto en la base de datos.
+   * Alterna la disponibilidad de un producto sincronizando con Firestore.
    */
   public async toggleAvailability(product: Product): Promise<void> {
     try {
-      // El sistema sincroniza el estado del toggle con Firestore
       await this.productService.updateProduct(product.id!, { 
-        is_enabled: product.is_enabled, // Se usa el valor actual del modelo vinculado al ngModel
+        is_enabled: product.is_enabled,
       });
     } catch (error) {
       console.error('Error al cambiar disponibilidad:', error);
@@ -84,7 +82,7 @@ export class ProductManagementComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    // El sistema destruye la instancia del diálogo al salir del componente para evitar fugas de memoria
+    // Cerramos cualquier instancia activa para evitar memory leaks
     if (this.ref) {
       this.ref.close();
     }
