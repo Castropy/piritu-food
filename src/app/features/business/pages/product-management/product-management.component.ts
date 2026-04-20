@@ -13,20 +13,20 @@ import { Button } from 'primeng/button';
 import { Tag } from 'primeng/tag';
 
 // Dialog Service
-import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { DialogService, DynamicDialogModule, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { ProductFormComponent } from '../../components/product-form/product-form.component';
 
 @Component({
   selector: 'app-product-management',
   standalone: true,
-  providers: [DialogService], // El sistema provee el servicio localmente para encapsular el estado del diálogo
   imports: [
     CommonModule,  
     FormsModule,
     TableModule, 
     ToggleSwitch, 
     Button, 
-    Tag
+    Tag,
+    DynamicDialogModule, 
   ],
   templateUrl: './product-management.component.html'
 })

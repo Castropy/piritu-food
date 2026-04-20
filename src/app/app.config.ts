@@ -1,6 +1,5 @@
 import { 
   ApplicationConfig, 
-  // 1. Cambiamos provideZoneChangeDetection por este:
   provideZonelessChangeDetection 
 } from '@angular/core';
 import { provideRouter } from '@angular/router';
@@ -16,15 +15,21 @@ import { getStorage, provideStorage } from '@angular/fire/storage';
 import { routes } from './app.routes';
 import { environment } from '../environments/environment';
 
+// ✅ CORRECCIÓN: Importación desde el punto de entrada oficial
+import { DialogService } from 'primeng/dynamicdialog';
+
+
 export const appConfig: ApplicationConfig = {
   providers: [
-    // 2. Sustituimos provideZoneChangeDetection
     provideZonelessChangeDetection(), 
     
     provideRouter(routes),
     provideClientHydration(withEventReplay()),
 
-    provideAnimationsAsync(), 
+    provideAnimationsAsync(),
+    
+    // ✅ Mantenemos el DialogService aquí como provider global
+    DialogService,
 
     // --- Configuración de Firebase ---
     provideFirebaseApp(() => initializeApp(environment.firebase)),
