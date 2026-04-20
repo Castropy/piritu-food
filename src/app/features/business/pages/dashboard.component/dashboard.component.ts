@@ -1,11 +1,11 @@
 import { Component, OnInit, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router'; // El sistema importa RouterOutlet para el manejo de rutas hijas
-import { BusinessService } from '../../../core/services/businesses/business.service';
-import { OrderService } from '../../../core/services/orders/order.service';
-import { Order } from '../../../data/interfaces';
+import { BusinessService } from '../../../../core/services/businesses/business.service';
+import { OrderService } from '../../../../core/services/orders/order.service';
+import { Order } from '../../../../data/interfaces';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { BusinessLogicUtils } from '../../../core/utils/businesses/business-logic.utils';
+import { BusinessLogicUtils } from '../../../../core/utils/businesses/business-logic.utils';
 
 @Component({
   selector: 'app-dashboard',
