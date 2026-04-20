@@ -1,8 +1,8 @@
 import { Component, OnInit, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { OrderService } from '../../../core/services/orders/order.service';
-import { BusinessService } from '../../../core/services/businesses/business.service';
-import { Order } from '../../../data/interfaces';
+import { OrderService } from '../../../../core/services/orders/order.service';
+import { BusinessService } from '../../../../core/services/businesses/business.service';
+import { Order } from '../../../../data/interfaces';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
