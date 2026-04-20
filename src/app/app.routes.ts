@@ -23,16 +23,18 @@ export const routes: Routes = [
   // --- RUTAS PROTEGIDAS (Requieren Login) ---
   
   // DASHBOARD: Para los dueños de negocios
+  // El sistema reestructura el Dashboard como un Layout persistente para sus rutas hijas
   {
     path: 'dashboard',
     canActivate: [authGuard],
+    loadComponent: () => import('./features/business/dashboard.component/dashboard.component').then(m => m.DashboardComponent),
     children: [
       {
-        path: '',
-        loadComponent: () => import('./features/business/dashboard.component/dashboard.component').then(m => m.DashboardComponent),
+        path: '', // Ruta por defecto: /dashboard (Muestra la cola de pedidos)
+        loadComponent: () => import('./features/business/orders.component/orders.component').then(m => m.OrdersComponent),
       },
       {
-        path: 'products',
+        path: 'products', // Ruta: /dashboard/products (Muestra la gestión de productos)
         loadComponent: () => import('./features/business/product-management/product-management.component').then(m => m.ProductManagementComponent),
       }
     ]
