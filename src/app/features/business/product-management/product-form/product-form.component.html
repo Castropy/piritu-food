@@ -49,16 +49,31 @@
   </div>
 
   <div class="flex flex-col gap-2">
-    <label class="font-bold text-gray-700">Ingredientes / Descripción breve</label>
-    <p-chips 
+    <label class="font-bold text-gray-700">Ingredientes / Descripción</label>
+    <p-multiSelect 
+      [options]="ingredientOptions" 
       formControlName="ingredients" 
-      placeholder="Escribe un ingrediente y presiona Enter"
-      styleClass="w-full"
-      inputStyleClass="rounded-xl w-full">
-    </p-chips>
+      optionLabel="label" 
+      optionValue="value"
+      placeholder="Selecciona los ingredientes principales" 
+      display="chip"
+      styleClass="w-full rounded-xl"
+      [filter]="true"
+      [maxSelectedLabels]="3">
+    </p-multiSelect>
+    <small class="text-gray-500">Puedes seleccionar varios de la lista.</small>
   </div>
 
-  <div class="pt-4">
+  <div class="flex flex-col md:flex-row gap-3 pt-4">
+    <p-button 
+      type="button"
+      label="Cancelar" 
+      severity="secondary"
+      [outlined]="true"
+      (click)="onCancel()"
+      styleClass="w-full py-3 rounded-2xl font-bold transition-all">
+    </p-button>
+
     <p-button 
       type="submit" 
       label="Crear Producto" 
