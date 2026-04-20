@@ -2,10 +2,10 @@ import { Component, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { ProductService } from '../../../core/services/products/product.service';
-import { BusinessService } from '../../../core/services/businesses/business.service';
+import { ProductService } from '../../../../core/services/products/product.service';
+import { BusinessService } from '../../../../core/services/businesses/business.service';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Product } from '../../../data/interfaces';
+import { Product } from '../../../../data/interfaces';
 
 // PrimeNG v21 Components
 import { TableModule } from 'primeng/table';
@@ -15,7 +15,7 @@ import { Tag } from 'primeng/tag';
 
 // Dialog Service
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
-import { ProductFormComponent } from './product-form/product-form.component';
+import { ProductFormComponent } from '../../components/product-form/product-form.component';
 
 @Component({
   selector: 'app-product-management',

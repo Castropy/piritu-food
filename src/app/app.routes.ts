@@ -35,7 +35,7 @@ export const routes: Routes = [
       },
       {
         path: 'products', // Ruta: /dashboard/products (Muestra la gestión de productos)
-        loadComponent: () => import('./features/business/product-management/product-management.component').then(m => m.ProductManagementComponent),
+        loadComponent: () => import('./features/business/pages/product-management/product-management.component').then(m => m.ProductManagementComponent),
       }
     ]
   },
