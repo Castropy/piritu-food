@@ -1,19 +1,19 @@
 import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router } from '@angular/router'; // ✅ Inyectamos el Router para navegación
 import { ProductService } from '../../../../core/services/products/product.service';
 import { BusinessService } from '../../../../core/services/businesses/business.service';
 import { GLOBAL_CATEGORIES } from '../../../../core/constants/category.constants';
 import { Product } from '../../../../data/interfaces';
 import { Subscription } from 'rxjs';
 
-// ✅ PrimeNG: Rutas oficiales para evitar errores de specifier en Vite
+// ✅ PrimeNG: Mantenemos solo los componentes de UI
 import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { SelectModule } from 'primeng/select';
 import { MultiSelectModule } from 'primeng/multiselect'; 
 import { ButtonModule } from 'primeng/button';
-import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
 
 @Component({
   selector: 'app-product-form',
@@ -33,11 +33,8 @@ export class ProductFormComponent implements OnInit, OnDestroy {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly productService = inject(ProductService);
   private readonly businessService = inject(BusinessService);
+  private readonly router = inject(Router); // ✅ Cambio: Router en lugar de DynamicDialogRef
   
-  // ✅ Inyectamos las referencias del diálogo dinámico
-  public readonly ref = inject(DynamicDialogRef);
-  public readonly config = inject(DynamicDialogConfig); 
-
   private sub?: Subscription;
   public categories = GLOBAL_CATEGORIES;
   public isCustomCategory = false;
@@ -76,8 +73,11 @@ export class ProductFormComponent implements OnInit, OnDestroy {
     });
   }
 
+  /**
+   * Navega de vuelta a la gestión de productos sin guardar.
+   */
   public onCancel(): void {
-    this.ref.close(false);
+    this.router.navigate(['/business/product-management']);
   }
 
   async onSubmit() {
@@ -103,7 +103,8 @@ export class ProductFormComponent implements OnInit, OnDestroy {
 
     try {
       await this.productService.addProduct(newProduct);
-      this.ref.close(true);
+      // ✅ Éxito: Volvemos a la lista de productos
+      this.router.navigate(['/business/product-management']);
     } catch (error) {
       console.error('❌ Error al guardar el producto:', error);
     }
