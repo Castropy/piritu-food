@@ -12,22 +12,21 @@ import { ToggleSwitch } from 'primeng/toggleswitch';
 import { Button } from 'primeng/button';
 import { Tag } from 'primeng/tag';
 
-// ✅ Importación limpia de DynamicDialog
-import { DialogService, DynamicDialogModule, DynamicDialogRef } from 'primeng/dynamicdialog';
+// ✅ Importación limpia: El DialogService se provee desde app.config.ts
+import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 import { ProductFormComponent } from '../../components/product-form/product-form.component';
 
 @Component({
   selector: 'app-product-management',
   standalone: true,
-  // 💡 Ya no necesitamos 'providers: [DialogService]' aquí porque es global en app.config.ts
   imports: [
     CommonModule,  
     FormsModule,
     TableModule, 
     ToggleSwitch, 
     Button, 
-    Tag,
-    
+    Tag
+    // 💡 No importamos DynamicDialogModule aquí para evitar conflictos con el provider global
   ],
   templateUrl: './product-management.component.html'
 })
@@ -39,7 +38,7 @@ export class ProductManagementComponent implements OnDestroy {
   private ref: DynamicDialogRef | undefined | null;
 
   /**
-   * Obtiene la lista de productos reactivamente vinculada al negocio seleccionado.
+   * Obtiene la lista de productos de forma reactiva.
    */
   public products = toSignal(
     this.productService.getProductsByBusiness(this.businessService.selectedBusiness()?.id || ''),
@@ -47,29 +46,31 @@ export class ProductManagementComponent implements OnDestroy {
   );
 
   /**
-   * Despliega el formulario de producto en un diálogo dinámico.
+   * Abre el formulario de nuevo producto.
+   * Al usar el DialogService global, PrimeNG gestiona el overlay automáticamente.
    */
   public showProductForm(): void {
     this.ref = this.dialogService.open(ProductFormComponent, {
-      header: 'Nuevo Producto - PírituFood',
+      header: 'NUEVO PRODUCTO',
       width: '50vw',
       breakpoints: { '960px': '75vw', '640px': '90vw' },
       closable: true,
       modal: true,
       styleClass: 'custom-product-dialog',
-      // 💡 Importante: Esto asegura que el DialogService sepa dónde inyectar el componente
+      // 💡 appendTo: 'body' asegura que el diálogo se renderice fuera de este componente
+      // evitando errores de jerarquía de inyección.
       appendTo: 'body' 
     });
 
     this.ref?.onClose.subscribe((added: boolean) => {
       if (added) {
-        console.log('El sistema detectó un nuevo producto agregado');
+        console.log('✅ Producto agregado exitosamente');
       }
     });
   }
 
   /**
-   * Alterna la disponibilidad de un producto sincronizando con Firestore.
+   * Actualiza el estado de disponibilidad en Firestore.
    */
   public async toggleAvailability(product: Product): Promise<void> {
     try {
@@ -77,12 +78,11 @@ export class ProductManagementComponent implements OnDestroy {
         is_enabled: product.is_enabled,
       });
     } catch (error) {
-      console.error('Error al cambiar disponibilidad:', error);
+      console.error('❌ Error al actualizar disponibilidad:', error);
     }
   }
 
   ngOnDestroy(): void {
-    // Cerramos cualquier instancia activa para evitar memory leaks
     if (this.ref) {
       this.ref.close();
     }
