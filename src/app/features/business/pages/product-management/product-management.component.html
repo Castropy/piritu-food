@@ -6,11 +6,11 @@
       <p class="text-gray-500 text-sm font-medium">Controla precios, disponibilidad y categorías de tus platos</p>
     </div>
     
-    <button (click)="showProductForm()" 
-            class="bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 rounded-2xl font-black transition-all shadow-[0_10px_20px_rgba(249,115,22,0.3)] flex items-center gap-3 transform hover:-translate-y-1 active:scale-95">
+    <a routerLink="../product-form" 
+       class="bg-orange-500 hover:bg-orange-600 text-white px-8 py-4 rounded-2xl font-black transition-all shadow-[0_10px_20px_rgba(249,115,22,0.3)] flex items-center gap-3 transform hover:-translate-y-1 active:scale-95 no-underline cursor-pointer">
       <i class="pi pi-plus-circle text-xl"></i>
       NUEVO PRODUCTO
-    </button>
+    </a>
   </div>
 
   <div class="bg-white rounded-2rem shadow-sm border border-gray-100 overflow-hidden">
@@ -93,4 +93,3 @@
     </p-table>
   </div>
 </div>
-
