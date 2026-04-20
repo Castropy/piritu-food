@@ -15,7 +15,8 @@
     "moduleResolution": "bundler",
     "baseUrl": "./",
     "paths": {
-      "primeng/*": ["node_modules/primeng/*"]
+      "primeng/*": ["node_modules/primeng/*"],
+      "primeng": ["node_modules/primeng/fesm2022/primeng.mjs"]
     }
   },
   "angularCompilerOptions": {
