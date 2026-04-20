@@ -12,7 +12,7 @@ import { ToggleSwitch } from 'primeng/toggleswitch';
 
 // ✅ Importación limpia: El DialogService se provee desde app.config.ts
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
-import { ProductFormComponent } from '../../components/product-form/product-form.component';
+import { ProductFormComponent } from '../product-form/product-form.component';
 
 @Component({
   selector: 'app-product-management',
