@@ -1,6 +1,5 @@
 import { Component, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ProductService } from '../../../../core/services/products/product.service';
 import { BusinessService } from '../../../../core/services/businesses/business.service';
@@ -22,8 +21,7 @@ import { ProductFormComponent } from '../../components/product-form/product-form
   standalone: true,
   providers: [DialogService], // El sistema provee el servicio localmente para encapsular el estado del diálogo
   imports: [
-    CommonModule, 
-    RouterLink, 
+    CommonModule,  
     FormsModule,
     TableModule, 
     ToggleSwitch, 
