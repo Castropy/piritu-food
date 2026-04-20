@@ -2,9 +2,6 @@ import { Component } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
-// ✅ CORRECCIÓN: Importación desde el punto de entrada oficial para evitar errores de Vite
-import { DynamicDialogModule } from 'primeng/dynamicdialog';
-
 @Component({
   selector: 'app-business-layout',
   standalone: true,
@@ -13,8 +10,7 @@ import { DynamicDialogModule } from 'primeng/dynamicdialog';
     RouterOutlet, 
     RouterLink, 
     RouterLinkActive,
-    // ✅ Importamos el módulo aquí para que p-dynamicdialog funcione en el HTML
-    DynamicDialogModule,
+    // ✅ Eliminamos DynamicDialogModule de los imports
   ],
   templateUrl: './business-layout.component.html',
   styles: [`
