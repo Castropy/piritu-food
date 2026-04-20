@@ -1,19 +1,18 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router'; // El sistema importa RouterOutlet para el manejo de rutas hijas
 import { BusinessService } from '../../../core/services/businesses/business.service';
 import { OrderService } from '../../../core/services/orders/order.service';
-import { Business, Order } from '../../../data/interfaces';
+import { Order } from '../../../data/interfaces';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { map } from 'rxjs';
 import { BusinessLogicUtils } from '../../../core/utils/businesses/business-logic.utils';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive],
+  // El sistema añade RouterOutlet para permitir la inyección dinámica de componentes hijos
+  imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet],
   templateUrl: './dashboard.component.html',
-  //styleUrl: './dashboard.component.scss'
 })
 export class DashboardComponent implements OnInit {
   // Inyección de servicios
@@ -22,40 +21,35 @@ export class DashboardComponent implements OnInit {
 
   /**
    * Obtiene el negocio seleccionado desde el estado global del servicio.
-   * Se utiliza el signal del servicio para mantener la reactividad.
+   * El sistema mantiene este signal aquí para mostrar la info en el Header del Layout.
    */
   public business = this.businessService.selectedBusiness;
 
   /**
    * Lista de órdenes del negocio obtenida en tiempo real.
-   * Se utiliza toSignal para convertir el Observable de Firestore en un Signal manejable.
+   * El sistema mantiene este stream en el Layout para alimentar los contadores globales (Stats).
    */
   private orders$ = this.orderService.getOrdersByBusiness(this.business()?.id || '');
   public orders = toSignal(this.orders$, { initialValue: [] as Order[] });
 
   /**
-   * Calcula el número de órdenes con estado 'pending' de forma reactiva.
+   * Calcula el número de órdenes con estado 'pending' para las cards superiores.
    */
   public pendingOrdersCount = computed(() => 
     this.orders().filter(o => o.status === 'pending').length
   );
 
   /**
-   * Determina si el producto MVP debe ser actualizado 
-   * (Lógica inicial para el recordatorio de marketing).
-   */
-  /**
    * Determina si el producto MVP debe ser actualizado.
-   * El sistema normaliza la fecha de selección para compararla con la fecha actual.
+   * El sistema normaliza la fecha para el recordatorio visual en el Layout.
    */
   public needsMvpUpdate = computed(() => {
     const mvp = this.business()?.mvp_product;
     if (!mvp) return true;
     
-    // Normalización manual para resolver el error de tipos en el constructor de Date
     const selectionDate = mvp.selection_date instanceof Date 
       ? mvp.selection_date 
-      : (mvp.selection_date as any).toDate(); // Convierte Timestamp a Date nativo
+      : (mvp.selection_date as any).toDate();
 
     const today = new Date();
     const diffTime = Math.abs(today.getTime() - selectionDate.getTime());
@@ -67,29 +61,19 @@ export class DashboardComponent implements OnInit {
   constructor() {}
 
   ngOnInit(): void {
-    // El sistema verifica que exista un negocio seleccionado al cargar
+    // El sistema verifica que exista un negocio seleccionado al cargar el panel
     if (!this.business()) {
       console.warn('[Dashboard] No hay un negocio seleccionado en el estado global.');
     }
   }
 
-  /**
-   * Actualiza el estado de una orden (ej. de 'pending' a 'accepted').
-   * Este método gatilla la actualización en Firestore y la UI reacciona automáticamente.
-   */
-  public async handleStatusUpdate(orderId: string, newStatus: any): Promise<void> {
-    try {
-      await this.orderService.updateStatus(orderId, newStatus);
-    } catch (error) {
-      console.error('Error al actualizar el estado del pedido:', error);
-    }
-  }
+  // El sistema traslada 'handleStatusUpdate' al OrdersComponent para mantener la lógica cerca de la tabla
 
   public businessStatus = computed(() => 
-  BusinessLogicUtils.getBusinessStatus(this.business())
-);
+    BusinessLogicUtils.getBusinessStatus(this.business())
+  );
 
-public isActuallyOpen = computed(() => 
-  this.businessStatus() === 'open'
-);
+  public isActuallyOpen = computed(() => 
+    this.businessStatus() === 'open'
+  );
 }
