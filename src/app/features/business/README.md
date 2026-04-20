@@ -17,10 +17,11 @@ Aquí residen los componentes que representan vistas completas (rutas):
 - **Dashboard**: Resumen de ventas, estado del comercio y métricas clave.
 - **Orders**: Cola de pedidos en tiempo real con integración a Firebase.
 - **Product Management**: Listado de inventario y control de disponibilidad.
+- **Product Form**: Formulario especializado (Standalone) para crear/editar productos. Implementa `MultiSelect` de PrimeNG para una gestión de ingredientes más robusta y sin errores de tipado.
 
 ### 🧩 `components/`
 Componentes de soporte reutilizables dentro de esta feature:
-- **Product Form**: Formulario especializado (Standalone) para crear/editar productos. Implementa `MultiSelect` de PrimeNG para una gestión de ingredientes más robusta y sin errores de tipado.
+
 
 ## 🚦 Flujo de Navegación y Rutas
 El acceso a este módulo está protegido por el `authGuard`. Las rutas están definidas de forma modular en `business.routes.ts` utilizando **Lazy Loading** para optimizar el rendimiento.
@@ -28,6 +29,7 @@ El acceso a este módulo está protegido por el `authGuard`. Las rutas están de
 - `/business/dashboard` -> Vista principal.
 - `/business/orders` -> Gestión de pedidos activos.
 - `/business/product-management` -> Gestión de catálogo.
+- `/business/product-form` -> Formulario para crear productos.
 
 ## 🛡️ Reglas de Oro
 1. **Separación de Capas**: Ningún componente de esta carpeta realiza peticiones HTTP o llamadas a Firestore directamente; siempre pasan a través del `ProductService` o `BusinessService` en la capa `core`.
