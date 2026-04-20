@@ -7,13 +7,14 @@ import { GLOBAL_CATEGORIES } from '../../../../core/constants/category.constants
 import { Product } from '../../../../data/interfaces';
 import { Subscription } from 'rxjs';
 
-// Cambiamos Chips por MultiSelect que es más robusto en los tipos de la v21
+// PrimeNG
 import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { SelectModule } from 'primeng/select';
-import { MultiSelectModule } from 'primeng/multiselect'; // Alternativa estable
+import { MultiSelectModule } from 'primeng/multiselect'; 
 import { ButtonModule } from 'primeng/button';
-import { DynamicDialogRef } from 'primeng/dynamicdialog';
+// ✅ Importamos ambos para estabilizar el contexto de inyección
+import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
 
 @Component({
   selector: 'app-product-form',
@@ -24,22 +25,25 @@ import { DynamicDialogRef } from 'primeng/dynamicdialog';
     InputTextModule,
     InputNumberModule,
     SelectModule,
-    MultiSelectModule, // Usamos este en lugar de Chips
+    MultiSelectModule,
     ButtonModule
   ],
+  // ✅ IMPORTANTE: No agregues providers aquí, deja que los tome del DialogService global
   templateUrl: './product-form.component.html'
 })
 export class ProductFormComponent implements OnInit, OnDestroy {
   private fb = inject(NonNullableFormBuilder);
   private productService = inject(ProductService);
   private businessService = inject(BusinessService);
-  private ref = inject(DynamicDialogRef);
+  
+  // ✅ Inyecciones de PrimeNG
+  public ref = inject(DynamicDialogRef);
+  public config = inject(DynamicDialogConfig); 
 
   private sub?: Subscription;
   public categories = GLOBAL_CATEGORIES;
   public isCustomCategory = false;
 
-  // Lista de sugerencias para ingredientes (puedes ampliarla)
   public ingredientOptions = [
     { label: 'Queso', value: 'Queso' },
     { label: 'Salsa de Tomate', value: 'Salsa de Tomate' },
@@ -54,7 +58,7 @@ export class ProductFormComponent implements OnInit, OnDestroy {
     price: [0, [Validators.required, Validators.min(0.1)]],
     category_selection: ['', [Validators.required]],
     custom_category_name: [''],
-    ingredients: [[] as string[]], // MultiSelect manejará este array
+    ingredients: [[] as string[]], 
     extras: [[] as string[]],
     image_url: [null as string | null]
   });

@@ -27,7 +27,7 @@ import { ProductFormComponent } from '../../components/product-form/product-form
     ToggleSwitch, 
     Button, 
     Tag,
-    DynamicDialogModule, 
+    
   ],
   templateUrl: './product-management.component.html'
 })
