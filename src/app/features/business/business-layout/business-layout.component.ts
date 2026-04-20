@@ -1,11 +1,15 @@
 import { Component } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { DynamicDialogModule } from 'primeng/types/primeng-dynamicdialog';
 
 @Component({
   selector: 'app-business-layout',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [
+    CommonModule, RouterOutlet, RouterLink, RouterLinkActive,
+    DynamicDialogModule,
+  ],
   templateUrl: './business-layout.component.html',
   styles: [`
     :host {
