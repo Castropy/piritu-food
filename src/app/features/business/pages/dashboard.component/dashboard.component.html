@@ -1,65 +1,75 @@
-<div class="p-6 max-w-7xl mx-auto space-y-6">
+<div class="space-y-6 animate-fade-in">
   
-  <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+  <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
     <div>
-      <h1 class="text-2xl font-bold text-gray-800">{{ business()?.name }}</h1>
+      <h1 class="text-2xl font-black text-gray-800">¡Hola, {{ business()?.name }}! 👋</h1>
       <p class="text-gray-500 flex items-center gap-2">
-        <span class="w-3 h-3 rounded-full bg-green-500"></span>
-        Panel Administrativo - PírituFood
+        <span class="w-3 h-3 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></span>
+        Tu negocio está operativo en Píritu y Araure
       </p>
     </div>
 
     @if (needsMvpUpdate()) {
-      <div class="flex items-center gap-3 bg-amber-50 border border-amber-200 p-3 rounded-lg text-amber-800 animate-pulse">
-        <i class="pi pi-exclamation-triangle"></i>
-        <span class="text-sm font-medium">Socio, es hora de actualizar tu producto MVP de la semana</span>
-        <button class="bg-amber-600 text-white px-3 py-1 rounded text-xs hover:bg-amber-700 transition">
-          Actualizar
+      <div class="flex items-center gap-3 bg-orange-50 border border-orange-100 p-4 rounded-xl text-orange-800 border-l-4 border-l-orange-500">
+        <i class="pi pi-bolt text-xl"></i>
+        <div class="flex flex-col">
+          <span class="text-sm font-bold">Impulsa tus ventas</span>
+          <span class="text-xs">Es momento de rotar tu producto MVP.</span>
+        </div>
+        <button class="ml-2 bg-orange-500 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-orange-600 transition-all shadow-md">
+          Cambiar
         </button>
       </div>
     }
   </header>
 
-  <nav class="flex gap-8 border-b border-gray-200 mb-6">
-    <a routerLink="/dashboard" 
-       routerLinkActive="border-orange-500 text-orange-600" 
-       [routerLinkActiveOptions]="{exact: true}"
-       class="pb-3 border-b-2 border-transparent font-semibold text-sm transition-all flex items-center gap-2">
-      <i class="pi pi-shopping-cart"></i>
-      Gestión de Pedidos
-    </a>
-
-    <a routerLink="/dashboard/products" 
-       routerLinkActive="border-orange-500 text-orange-600"
-       class="pb-3 border-b-2 border-transparent font-semibold text-sm transition-all flex items-center gap-2 text-gray-500 hover:text-gray-700">
-      <i class="pi pi-box"></i>
-      Catálogo de Productos
-    </a>
-  </nav>
-
   <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-      <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Pedidos Pendientes</h3>
-      <div class="mt-2 flex items-baseline gap-2">
-        <span class="text-4xl font-black text-blue-600">{{ pendingOrdersCount() }}</span>
-        <span class="text-gray-400">por atender</span>
+    
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow cursor-default">
+      <div class="flex justify-between items-start">
+        <h3 class="text-sm font-bold text-gray-400 uppercase tracking-widest">Cola de Pedidos</h3>
+        <i class="pi pi-shopping-cart text-blue-500 bg-blue-50 p-2 rounded-lg"></i>
+      </div>
+      <div class="mt-4 flex items-baseline gap-2">
+        <span class="text-5xl font-black text-blue-600">{{ pendingOrdersCount() }}</span>
+        <span class="text-gray-400 font-medium font-sm">pendientes</span>
       </div>
     </div>
 
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
-      <img [src]="business()?.mvp_product?.image_url || 'assets/images/placeholder.png'" 
-           class="w-16 h-16 rounded-lg object-cover bg-gray-100" 
-           alt="MVP Product">
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-5 hover:shadow-md transition-shadow">
+      <div class="relative">
+        <img [src]="business()?.mvp_product?.image_url || 'assets/images/placeholder.png'" 
+             class="w-20 h-20 rounded-2xl object-cover shadow-sm bg-gray-50" 
+             alt="MVP Product">
+        <span class="absolute -top-2 -right-2 bg-orange-500 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-sm">MVP</span>
+      </div>
       <div>
-        <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wider">MVP de la Semana</h3>
-        <p class="font-bold text-gray-800">{{ business()?.mvp_product?.name || 'No seleccionado' }}</p>
-        <p class="text-green-600 font-medium">{{ business()?.mvp_product?.price | currency:'USD' }}</p>
+        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Producto Estrella</h3>
+        <p class="font-black text-gray-800 leading-tight">{{ business()?.mvp_product?.name || 'No seleccionado' }}</p>
+        <p class="text-green-600 font-bold mt-1">{{ business()?.mvp_product?.price | currency:'USD' }}</p>
+      </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
+       <div class="flex justify-between items-start">
+        <h3 class="text-sm font-bold text-gray-400 uppercase tracking-widest">Estatus</h3>
+        <i class="pi pi-clock text-green-500 bg-green-50 p-2 rounded-lg"></i>
+      </div>
+      <div class="mt-4">
+        <span [class]="isActuallyOpen() ? 'text-green-600' : 'text-red-600'" class="text-2xl font-black uppercase italic">
+          {{ isActuallyOpen() ? 'Abierto' : 'Cerrado' }}
+        </span>
+        <p class="text-xs text-gray-400 font-medium">Sincronizado con horario local</p>
       </div>
     </div>
   </div>
 
-  <main class="animate-fade-in">
-    <router-outlet></router-outlet>
-  </main>
+  <div class="bg-white p-8 rounded-2xl border border-dashed border-gray-200 flex flex-col items-center justify-center text-center space-y-3">
+    <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center">
+      <i class="pi pi-chart-line text-gray-300 text-2xl"></i>
+    </div>
+    <h4 class="font-bold text-gray-400 text-lg">Próximamente: Gráficas de Ventas</h4>
+    <p class="text-gray-400 max-w-xs text-sm italic">Estamos trabajando para mostrarte el crecimiento de tu negocio en tiempo real.</p>
+  </div>
 
 </div>
