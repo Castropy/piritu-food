@@ -1,16 +1,17 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ProductService } from '../../../../core/services/products/product.service';
 import { BusinessService } from '../../../../core/services/businesses/business.service';
 import { GLOBAL_CATEGORIES } from '../../../../core/constants/category.constants';
 import { Product } from '../../../../data/interfaces';
+import { Subscription } from 'rxjs';
 
 // PrimeNG v21 Standalone Components
 import { InputText } from 'primeng/inputtext';
 import { InputNumber } from 'primeng/inputnumber';
 import { Select } from 'primeng/select'; 
-import { Chip } from 'primeng/chip';
+import { Chip } from 'primeng/chip'; // El sistema importa Chips (estaba faltando)
 import { Button } from 'primeng/button';
 import { DynamicDialogRef } from 'primeng/dynamicdialog';
 
@@ -28,12 +29,13 @@ import { DynamicDialogRef } from 'primeng/dynamicdialog';
   ],
   templateUrl: './product-form.component.html'
 })
-export class ProductFormComponent implements OnInit {
+export class ProductFormComponent implements OnInit, OnDestroy {
   private fb = inject(NonNullableFormBuilder);
   private productService = inject(ProductService);
   private businessService = inject(BusinessService);
   private ref = inject(DynamicDialogRef);
 
+  private sub?: Subscription; // El sistema prepara la limpieza de suscripciones
   public categories = GLOBAL_CATEGORIES;
   public isCustomCategory = false;
 
@@ -48,7 +50,8 @@ export class ProductFormComponent implements OnInit {
   });
 
   ngOnInit() {
-    this.productForm.get('category_selection')?.valueChanges.subscribe(value => {
+    // El sistema monitorea el cambio de categoría para habilitar campos personalizados
+    this.sub = this.productForm.get('category_selection')?.valueChanges.subscribe(value => {
       this.isCustomCategory = value === 'personalizada';
       const customCtrl = this.productForm.get('custom_category_name');
       
@@ -60,6 +63,13 @@ export class ProductFormComponent implements OnInit {
       }
       customCtrl?.updateValueAndValidity();
     });
+  }
+
+  /**
+   * Cierra el diálogo sin realizar cambios.
+   */
+  public onCancel(): void {
+    this.ref.close(false);
   }
 
   async onSubmit() {
@@ -86,10 +96,16 @@ export class ProductFormComponent implements OnInit {
     };
 
     try {
+      // El sistema guarda el producto y retorna una señal de éxito al componente padre
       await this.productService.addProduct(newProduct);
       this.ref.close(true);
     } catch (error) {
       console.error('Error al guardar el producto:', error);
     }
+  }
+
+  ngOnDestroy() {
+    // El sistema limpia la suscripción para optimizar el rendimiento
+    this.sub?.unsubscribe();
   }
 }
