@@ -1,86 +1,93 @@
-<form [formGroup]="productForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-5 p-1">
+<form [formGroup]="productForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-6 p-2 animate-fade-in">
   
   <div class="flex flex-col gap-2">
-    <label class="font-bold text-gray-700">Nombre del Producto</label>
-    <input 
-      pInputText 
-      formControlName="name" 
-      placeholder="Ej: Pizza Familiar" 
-      class="rounded-xl w-full" />
-    <small class="text-red-500" *ngIf="productForm.get('name')?.invalid && productForm.get('name')?.touched">
-      El nombre debe tener al menos 3 caracteres.
-    </small>
+    <label class="text-xs font-black uppercase tracking-widest text-gray-400 ml-1">Nombre del Producto</label>
+    <div class="p-input-icon-left w-full">
+      <i class="pi pi-tag text-gray-400"></i>
+      <input 
+        pInputText 
+        formControlName="name" 
+        placeholder="Ej: Burger Triple Queso" 
+        class="w-full rounded-2xl border-gray-200 focus:border-orange-500 focus:ring-orange-500/20 py-3 pl-10 transition-all shadow-sm" />
+    </div>
+    @if (productForm.get('name')?.invalid && productForm.get('name')?.touched) {
+      <small class="text-red-500 font-bold flex items-center gap-1 animate-slide-in">
+        <i class="pi pi-times-circle text-xs"></i> El nombre es demasiado corto.
+      </small>
+    }
   </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
     <div class="flex flex-col gap-2">
-      <label class="font-bold text-gray-700">Precio ($)</label>
+      <label class="text-xs font-black uppercase tracking-widest text-gray-400 ml-1">Precio ($)</label>
       <p-inputnumber 
         formControlName="price" 
         mode="currency" 
         currency="USD" 
         locale="en-US" 
-        [min]="0"
+        [min]="0.1"
         styleClass="w-full"
-        inputStyleClass="rounded-xl w-full">
+        inputStyleClass="w-full rounded-2xl border-gray-200 py-3 font-black text-orange-600 shadow-sm">
       </p-inputnumber>
     </div>
 
     <div class="flex flex-col gap-2">
-      <label class="font-bold text-gray-700">Categoría</label>
+      <label class="text-xs font-black uppercase tracking-widest text-gray-400 ml-1">Categoría</label>
       <p-select 
         [options]="categories" 
         formControlName="category_selection" 
         optionLabel="name" 
         optionValue="id" 
-        placeholder="Selecciona una" 
-        styleClass="w-full rounded-xl">
+        placeholder="Seleccionar..." 
+        styleClass="w-full rounded-2xl border-gray-200 shadow-sm"
+        appendTo="body">
       </p-select>
     </div>
   </div>
 
-  <div *ngIf="isCustomCategory" class="flex flex-col gap-2 animate-fade-in">
-    <label class="font-bold text-orange-600">Nombre de tu Categoría</label>
-    <input 
-      pInputText 
-      formControlName="custom_category_name" 
-      placeholder="Ej: Especialidades Árabes" 
-      class="border-orange-300 rounded-xl w-full" />
-  </div>
+  @if (isCustomCategory) {
+    <div class="flex flex-col gap-2 animate-fade-in">
+      <label class="text-xs font-black uppercase tracking-widest text-orange-600 ml-1 italic">Nueva Categoría</label>
+      <input 
+        pInputText 
+        formControlName="custom_category_name" 
+        placeholder="Escribe el nombre aquí..." 
+        class="w-full rounded-2xl border-orange-200 bg-orange-50/30 py-3 shadow-inner focus:border-orange-500" />
+    </div>
+  }
 
   <div class="flex flex-col gap-2">
-    <label class="font-bold text-gray-700">Ingredientes / Descripción</label>
+    <label class="text-xs font-black uppercase tracking-widest text-gray-400 ml-1">Ingredientes Principales</label>
     <p-multiSelect 
       [options]="ingredientOptions" 
       formControlName="ingredients" 
       optionLabel="label" 
       optionValue="value"
-      placeholder="Selecciona los ingredientes principales" 
+      placeholder="¿Qué lleva este plato?" 
       display="chip"
-      styleClass="w-full rounded-xl"
+      styleClass="w-full rounded-2xl border-gray-200 shadow-sm"
       [filter]="true"
-      [maxSelectedLabels]="3">
+      [maxSelectedLabels]="4"
+      appendTo="body">
     </p-multiSelect>
-    <small class="text-gray-500">Puedes seleccionar varios de la lista.</small>
+    <p class="text-[10px] text-gray-400 font-medium italic ml-1">* Estos ingredientes se mostrarán al cliente en la app.</p>
   </div>
 
-  <div class="flex flex-col md:flex-row gap-3 pt-4">
-    <p-button 
+  <div class="flex flex-col md:flex-row gap-4 pt-4 mt-2">
+    <button 
       type="button"
-      label="Cancelar" 
-      severity="secondary"
-      [outlined]="true"
       (click)="onCancel()"
-      styleClass="w-full py-3 rounded-2xl font-bold transition-all">
-    </p-button>
+      class="flex-1 py-4 rounded-2xl font-black text-gray-400 hover:bg-gray-50 border border-gray-100 transition-all uppercase tracking-widest text-xs">
+      Cancelar
+    </button>
 
-    <p-button 
+    <button 
       type="submit" 
-      label="Crear Producto" 
-      icon="pi pi-check"
       [disabled]="productForm.invalid" 
-      styleClass="p-button-orange w-full py-3 rounded-2xl font-bold shadow-lg transition-all">
-    </p-button>
+      class="flex-1 py-4 rounded-2xl font-black text-white bg-orange-500 hover:bg-orange-600 disabled:bg-gray-200 disabled:text-gray-400 shadow-lg shadow-orange-500/30 transition-all transform hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-2 uppercase tracking-widest text-xs">
+      <i class="pi pi-check"></i>
+      Guardar Producto
+    </button>
   </div>
 
 </form>
