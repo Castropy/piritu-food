@@ -24,6 +24,11 @@ export const BUSINESS_ROUTES: Routes = [
           ),
       },
       {
+        path: 'product-form',
+        loadComponent: () => 
+          import('./pages/product-form/product-form.component').then((m) => m.ProductFormComponent),
+      },
+      {
         path: '',
         redirectTo: 'dashboard',
         pathMatch: 'full',
