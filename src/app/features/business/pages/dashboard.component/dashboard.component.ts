@@ -1,6 +1,5 @@
 import { Component, OnInit, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router'; // El sistema importa RouterOutlet para el manejo de rutas hijas
 import { BusinessService } from '../../../../core/services/businesses/business.service';
 import { OrderService } from '../../../../core/services/orders/order.service';
 import { Order } from '../../../../data/interfaces';
@@ -11,7 +10,7 @@ import { BusinessLogicUtils } from '../../../../core/utils/businesses/business-l
   selector: 'app-dashboard',
   standalone: true,
   // El sistema añade RouterOutlet para permitir la inyección dinámica de componentes hijos
-  imports: [CommonModule, RouterLink, RouterLinkActive, RouterOutlet],
+  imports: [CommonModule,],
   templateUrl: './dashboard.component.html',
 })
 export class DashboardComponent implements OnInit {
