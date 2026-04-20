@@ -7,13 +7,12 @@ import { GLOBAL_CATEGORIES } from '../../../../core/constants/category.constants
 import { Product } from '../../../../data/interfaces';
 import { Subscription } from 'rxjs';
 
-// PrimeNG
+// ✅ PrimeNG: Rutas oficiales para evitar errores de specifier en Vite
 import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { SelectModule } from 'primeng/select';
 import { MultiSelectModule } from 'primeng/multiselect'; 
 import { ButtonModule } from 'primeng/button';
-// ✅ Importamos ambos para estabilizar el contexto de inyección
 import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
 
 @Component({
@@ -28,17 +27,16 @@ import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
     MultiSelectModule,
     ButtonModule
   ],
-  // ✅ IMPORTANTE: No agregues providers aquí, deja que los tome del DialogService global
   templateUrl: './product-form.component.html'
 })
 export class ProductFormComponent implements OnInit, OnDestroy {
-  private fb = inject(NonNullableFormBuilder);
-  private productService = inject(ProductService);
-  private businessService = inject(BusinessService);
+  private readonly fb = inject(NonNullableFormBuilder);
+  private readonly productService = inject(ProductService);
+  private readonly businessService = inject(BusinessService);
   
-  // ✅ Inyecciones de PrimeNG
-  public ref = inject(DynamicDialogRef);
-  public config = inject(DynamicDialogConfig); 
+  // ✅ Inyectamos las referencias del diálogo dinámico
+  public readonly ref = inject(DynamicDialogRef);
+  public readonly config = inject(DynamicDialogConfig); 
 
   private sub?: Subscription;
   public categories = GLOBAL_CATEGORIES;
@@ -107,7 +105,7 @@ export class ProductFormComponent implements OnInit, OnDestroy {
       await this.productService.addProduct(newProduct);
       this.ref.close(true);
     } catch (error) {
-      console.error('Error al guardar el producto:', error);
+      console.error('❌ Error al guardar el producto:', error);
     }
   }
 
