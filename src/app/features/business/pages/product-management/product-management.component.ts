@@ -9,8 +9,6 @@ import { Product } from '../../../../data/interfaces';
 // PrimeNG v21 Components
 import { TableModule } from 'primeng/table';
 import { ToggleSwitch } from 'primeng/toggleswitch';
-import { Button } from 'primeng/button';
-import { Tag } from 'primeng/tag';
 
 // ✅ Importación limpia: El DialogService se provee desde app.config.ts
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
@@ -23,10 +21,8 @@ import { ProductFormComponent } from '../../components/product-form/product-form
     CommonModule,  
     FormsModule,
     TableModule, 
-    ToggleSwitch, 
-    Button, 
-    Tag
-    // 💡 No importamos DynamicDialogModule aquí para evitar conflictos con el provider global
+    ToggleSwitch
+    // 💡 Se eliminan Button y Tag para limpiar warnings de compilación (NG8113)
   ],
   templateUrl: './product-management.component.html'
 })
@@ -47,7 +43,7 @@ export class ProductManagementComponent implements OnDestroy {
 
   /**
    * Abre el formulario de nuevo producto.
-   * Al usar el DialogService global, PrimeNG gestiona el overlay automáticamente.
+   * Al usar appendTo: 'body' y tener el host en el Layout, evitamos conflictos de CSS.
    */
   public showProductForm(): void {
     this.ref = this.dialogService.open(ProductFormComponent, {
@@ -57,13 +53,12 @@ export class ProductManagementComponent implements OnDestroy {
       closable: true,
       modal: true,
       styleClass: 'custom-product-dialog',
-      // 💡 appendTo: 'body' asegura que el diálogo se renderice fuera de este componente
-      // evitando errores de jerarquía de inyección.
       appendTo: 'body' 
     });
 
     this.ref?.onClose.subscribe((added: boolean) => {
       if (added) {
+        // Aquí podrías disparar un toast de éxito si lo deseas
         console.log('✅ Producto agregado exitosamente');
       }
     });
