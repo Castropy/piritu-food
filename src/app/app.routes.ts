@@ -22,22 +22,11 @@ export const routes: Routes = [
 
   // --- RUTAS PROTEGIDAS (Requieren Login) ---
   
-  // DASHBOARD: Para los dueños de negocios
-  // El sistema reestructura el Dashboard como un Layout persistente para sus rutas hijas
+  // BUSINESS: Usamos el nuevo sistema de rutas hijas cargadas por Lazy Loading
   {
-    path: 'dashboard',
+    path: 'business',
     canActivate: [authGuard],
-    loadComponent: () => import('./features/business/dashboard.component/dashboard.component').then(m => m.DashboardComponent),
-    children: [
-      {
-        path: '', // Ruta por defecto: /dashboard (Muestra la cola de pedidos)
-        loadComponent: () => import('./features/business/orders.component/orders.component').then(m => m.OrdersComponent),
-      },
-      {
-        path: 'products', // Ruta: /dashboard/products (Muestra la gestión de productos)
-        loadComponent: () => import('./features/business/pages/product-management/product-management.component').then(m => m.ProductManagementComponent),
-      }
-    ]
+    loadChildren: () => import('./features/business/business.routes').then(m => m.BUSINESS_ROUTES)
   },
 
   // ADMIN: Para el control total de PírituFood
@@ -48,8 +37,6 @@ export const routes: Routes = [
   },
 
   // --- MANEJO DE ERRORES ---
-  
-  // Si ponen una ruta que no existe, los mandamos de vuelta al Lobby
   {
     path: '**',
     redirectTo: ''
